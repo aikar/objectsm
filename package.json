@@ -9,6 +9,7 @@
     "lint": "gulp lint",
     "node": "cross-env NODE_ENV=development build/devnode.js",
     "postpack": "build/postpack.sh",
+    "example": "cross-env NODE_ENV=development build/devnode.js example/jsonobject.js",
     "start": "cross-env NODE_ENV=development build/devnode.js src/jsonobject.js"
   },
   "repository": {
@@ -68,5 +69,8 @@
     "module-alias": "^2.0.2",
     "rimraf": "^2.6.2",
     "run-sequence": "^2.2.0"
+  },
+  "dependencies": {
+    "as-array": "^2.0.0"
   }
 }
