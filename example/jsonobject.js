@@ -9,7 +9,7 @@
  *
  */
 
-import JsonObject from "../src/jsonobject";
+const JsonObject = !global.devNodeUseDist ? require("../src/index").JsonObject : require("../dist/index").JsonObject;
 
 class Test2 {
   /** @type string */

@@ -1,56 +1,15 @@
 /** @flow */
-/*
-/*
- * Copyright (c) (2017)
- *
- *  Written by Aikar <aikar@aikar.co>
- *
- *  @license MIT
- *
- */
-
-export type Config = {
-  mappings: {[key: string]: Class<any>},
-  creators?: {[key: string]: ObjectCreator<any>},
-  logger?: Function,
-  typeKey?: string,
-}
-
-export class ObjectCreator {
-  objCls: Class<T>;
-
-  constructor(objCls: Class<any>) {
-    this.objCls = objCls;
-  }
-
-  createObject(data: DataParameter): any {
-    const tpl = Object.create(this.objCls.prototype);
-
-    for (const [key, val] of Object.entries(data)) {
-      tpl[key] = val;
-    }
-    return tpl;
-  }
-}
-const MapObjectCreator = new (class extends ObjectCreator {
-  createObject(data: DataParameter): any {
-    return new Map(Object.entries(data));
-  }
-})();
-const SetObjectCreator = new (class extends ObjectCreator {
-  createObject(data: DataParameter): any {
-    return new Set(data);
-  }
-})();
+import {DefaultObjectCreator, MapObjectCreator, ObjectCreator, SetObjectCreator} from "./creators";
+import type {Config, DataParameter, IJsonOBjectBase} from "./index";
 
 export class JsonObject {
 
-  deseriaizedCount: number = 0;
+  deserializedCount: number = 0;
   typeKey: string;
-  id2ObjMap: Map<string, Class<any>> = new Map();
-  obj2IdMap: Map<Class<any>, string> = new Map();
+  id2ObjMap: Map<string, Function> = new Map();
+  obj2IdMap: Map<Function, string> = new Map();
   logger: Function = console.error.bind(console, "[JsonObject]");
-  objCreators: Map<Class<any>, ObjectCreator<any>> = new Map();
+  objCreators: Map<string, ObjectCreator> = new Map();
 
 
   constructor(config: Config) {
@@ -63,14 +22,24 @@ export class JsonObject {
     this.objCreators.set("__MAP", MapObjectCreator);
     this.objCreators.set("__SET", SetObjectCreator);
 
-    for (const [id, obj] of Object.entries(mappings)) {
-      this.id2ObjMap.set(id, obj);
-      this.obj2IdMap.set(obj, id);
-      this.objCreators.set(id, creators[id] || obj.ObjectCreator || new ObjectCreator(obj));
+
+    if (config.errorLogger) {
+      this.logger = config.errorLogger;
     }
 
-    if (config.logger) {
-      this.logger = config.logger;
+    // $FlowFixMe
+    for (const [id, obj]: [string, Function] of Object.entries(mappings)) {
+      this.id2ObjMap.set(id, obj);
+      this.obj2IdMap.set(obj, id);
+      let creator = creators[id] || DefaultObjectCreator;
+      if (obj.ObjectCreator) {
+        if (obj.ObjectCreator.createObject) {
+          creator = obj.ObjectCreator;
+        } else {
+          this.logger("Invalid ObjectCreator defined on " + obj.name + " - must implement createObject");
+        }
+      }
+      this.objCreators.set(id, creator);
     }
 
     this.typeKey = config.typeKey || ":cls";
@@ -130,9 +99,9 @@ export class JsonObject {
         queueDeserialize(item.val[thisIdx], queue);
       }
 
-      if (this.deseriaizedCount++ > 10000 && queue.length) {
+      if (this.deserializedCount++ > 10000 && queue.length) {
         await waitFor(2);
-        this.deseriaizedCount = 0;
+        this.deserializedCount = 0;
       }
     }
   }
@@ -177,9 +146,7 @@ export class JsonObject {
         throw new Error("Invalid Object Creator for " + id);
       }
 
-      const tpl = creator.createObject(data);
-
-      // eslint-disable-next-line private-props/no-use-outside
+      const tpl = creator.createObject(objCls, data);
       const deferDeserializing = tpl._deferDeserializing;
 
       delete data[this.typeKey];
@@ -209,14 +176,6 @@ export class JsonObject {
   }
 }
 
-export default JsonObject;
-
-export interface IJsonOBjectBase {
-  _deferDeserializing?: boolean;
-  deserializeObject(): Promise<any>;
-  rawData(): any;
-  onDeserialize(): any;
-}
 
 export class JsonObjectBase implements IJsonOBjectBase {
 
@@ -228,6 +187,9 @@ export class JsonObjectBase implements IJsonOBjectBase {
 
   onDeserialize() {}
 }
+
+type QueuedDeserialize = Function | {idx: any, val: any};
+
 
 /**
  * @param {object,object[]} obj
@@ -252,8 +214,6 @@ function queueDeserialize(obj: DataParameter, queue: Array<QueuedDeserialize>) {
   });
 
 }
-export type DataParameter = {[key: string]: any} | Array<any>;
-type QueuedDeserialize = Function | {idx: any, val: any};
 
 function waitFor(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));

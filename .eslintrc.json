@@ -1,7 +1,7 @@
 //http://eslint.org/docs/user-guide/configuring
 {
     "env": {
-        "browser": false,
+        "browser": true,
         "node": true,
         "es6": true,
         "commonjs": true,
@@ -40,16 +40,13 @@
     "plugins": [
         "babel",
         "flowtype",
-        "flowtype-errors",
-        "private-props"
+        "flowtype-errors"
     ],
     "extends": [
         "plugin:flowtype/recommended"
     ],
     "rules": {
         /*Possible Errors */
-        "private-props/no-unused-or-undeclared": 0,
-        "private-props/no-use-outside": 2,
         "no-cond-assign": [
             1,
             "except-parens"
