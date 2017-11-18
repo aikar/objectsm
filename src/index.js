@@ -26,7 +26,7 @@ export interface IJsonObject {
   rawData: () => any;
 }
 
-export {JsonObject, JsonObjectBase};
+export {JsonObject, JsonObjectBase, ObjectCreator};
 export default JsonObject;
 
 export type DataParameter = {[key: string]: any};
