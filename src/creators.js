@@ -21,6 +21,11 @@ export class ObjectCreator {
     }
     return obj;
   }
+
+  serializeObject(objCls: Function, data: DataParameter): void {
+
+  }
+
   onDeserialize(obj: any): Promise<void> | void {}
 }
 

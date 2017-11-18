@@ -12,6 +12,7 @@
 import {DefaultObjectCreator, MapObjectCreator, ObjectCreator, SetObjectCreator} from "./creators";
 import type {Config, DataParameter, IJsonObject, MappingEntry} from "./index";
 import clone from "clone";
+import toJson from "object-tojson";
 
 export class JsonObject {
 
@@ -104,13 +105,10 @@ export class JsonObject {
     }
   }
 
-  async serialize(data: any): Promise<any> {
-    const obj = clone(data);
-    const queue = [];
-
-    this.queueObject(obj, queue, this.serializeItem);
-    await this.processQueue(queue);
-    return obj;
+  async serialize(data: DataParameter): Promise<any> {
+    const json = toJson(data);
+    this.serializeItem(json, data);
+    return json;
   }
 
   /**
@@ -179,6 +177,7 @@ export class JsonObject {
     this.logger("Unknown Class Data:", id, data);
     throw new Error("Unknown class ID:" + id);
   }
+
   async deserializeItem(val: DataParameter, idx: string, queue: Array<Function>) {
     const thisData = val[idx];
     if (thisData[this.typeKey]) {
@@ -187,12 +186,26 @@ export class JsonObject {
       this.queueObject(val[idx], queue, this.deserializeItem);
     }
   }
-  async serializeItem(val: DataParameter, idx: string, queue: Array<Function>) {
-    const thisData = val[idx];
-    if (thisData[this.typeKey]) {
-      val[idx] = await this.createObject(thisData, queue);
-    } else if (typeof val[idx] === 'object') {
-      this.queueObject(val[idx], queue, this.serialize);
+
+  serializeItem(data: DataParameter, origVal: DataParameter) {
+    if (typeof data === 'object') {
+      if (Array.isArray(data)) {
+        for (let i = 0; i < data.length; i++) {
+          this.serializeItem(data[i], origVal[i]);
+        }
+      } else {
+        const id = this.obj2IdMap.get(origVal.constructor);
+
+        for (const [key, val] of Object.entries(data)) {
+          this.serializeItem(val, origVal[key]);
+        }
+
+        if (id) {
+          data[this.typeKey] = id;
+          const creator = this.objCreators.get(id);
+          creator.serializeObject(origVal.constructor, data);
+        }
+      }
     }
   }
 
@@ -229,7 +242,3 @@ export class JsonObjectBase implements IJsonObject {
   onDeserialize = () => {};
 }
 
-
-function waitFor(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}

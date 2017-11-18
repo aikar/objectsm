@@ -21,6 +21,11 @@ class Test4 extends JsonObjectBase {
       obj.hello += " with special";
       return obj;
     }
+
+    serializeObject(objCls: Function, data: DataParameter): void {
+      super.serializeObject(objCls, data);
+      data.hello = data.hello.replace(/ with special/, '');
+    }
   })();
 }
 
@@ -71,23 +76,23 @@ describe("Deserializing", () => {
     expect(deserialized.bar instanceof Test3).toBe(true);
     expect(deserialized.bar.test4 instanceof Test4).toBe(true);
   });
-  test('constructors are correct', function () {
+  test('Constructors are correct', function () {
     expect(deserialized.constructor.name).toEqual("Test1");
     expect(deserialized.foo.constructor.name).toEqual("Test2");
     expect(deserialized.bar.constructor.name).toEqual("Test3");
     expect(deserialized.bar.test4.constructor.name).toEqual("Test4");
   });
-  test('values are correct', function () {
+  test('Values are correct', function () {
     expect(deserialized.foo.baz).toEqual("Hello");
     expect(deserialized.bar.qux).toEqual(42);
     expect(deserialized.bar.test4.hello).toEqual("world! with special");
   });
 });
-/*
+
 describe("Serializing", () => {
   test("Matches original", async () => {
     const serialized = await deserializer.serialize(deserialized);
-    expect(testData).toEqual(serialized);
+    expect(serialized).toEqual(testData);
   });
   test("Uses configured type key", async () => {
     const serializer = new JsonObject({
@@ -98,4 +103,4 @@ describe("Serializing", () => {
     expect(Object.keys(serialized)).toContain(":test");
   });
 });
-*/
+
