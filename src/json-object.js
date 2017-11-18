@@ -1,6 +1,16 @@
 /** @flow */
+
+/*
+ * Copyright (c) (2017)
+ *
+ *  Written by Aikar <aikar@aikar.co>
+ *
+ *  @license MIT
+ *
+ */
+
 import {DefaultObjectCreator, MapObjectCreator, ObjectCreator, SetObjectCreator} from "./creators";
-import type {Config, DataParameter, IJsonOBjectBase} from "./index";
+import type {Config, DataParameter, IJsonObject, MappingEntry} from "./index";
 
 export class JsonObject {
 
@@ -22,13 +32,12 @@ export class JsonObject {
     this.objCreators.set("__MAP", MapObjectCreator);
     this.objCreators.set("__SET", SetObjectCreator);
 
-
     if (config.errorLogger) {
       this.logger = config.errorLogger;
     }
 
     // $FlowFixMe
-    for (const [id, obj]: [string, Function] of Object.entries(mappings)) {
+    for (const [id, obj] of (Object.entries(mappings): Array<[string, MappingEntry]>)) {
       this.id2ObjMap.set(id, obj);
       this.obj2IdMap.set(obj, id);
       let creator = creators[id] || DefaultObjectCreator;
@@ -110,14 +119,13 @@ export class JsonObject {
    * @param {JsonObjectBase} tpl
    * @returns {JsonObjectBase}
    */
-  async _deserializeObject(tpl: IJsonOBjectBase) {
+  async _deserializeObject(tpl: IJsonObject) {
     const queue = [];
     if (tpl.onDeserialize != null) {
       queue.push(() => tpl.onDeserialize());
     }
     const promise = queueDeserialize(tpl, queue);
     await this.processQueue(queue);
-    delete tpl['deserializeObject'];
     Object.defineProperty(tpl, 'deserializeObject', {
       enumerable: false,
       configurable: true,
@@ -151,8 +159,6 @@ export class JsonObject {
 
       delete data[this.typeKey];
       delete tpl['_deferDeserializing'];
-      delete tpl['deserializeObject'];
-      delete tpl['rawData'];
 
       Object.defineProperty(tpl, 'rawData', {
         enumerable: false,
@@ -176,8 +182,7 @@ export class JsonObject {
   }
 }
 
-
-export class JsonObjectBase implements IJsonOBjectBase {
+export class JsonObjectBase implements IJsonObject {
 
   /* abstract - will be injected from JsonObject */
   async deserializeObject() {}

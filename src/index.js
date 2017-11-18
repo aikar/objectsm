@@ -1,5 +1,5 @@
 /** @flow */
-/*
+
 /*
  * Copyright (c) (2017)
  *
@@ -12,14 +12,15 @@
 import {ObjectCreator} from "./creators";
 import {JsonObject, JsonObjectBase} from "./json-object";
 
+export type MappingEntry = (Class<any> | Function) & {ObjectCreator?: ObjectCreator};
 export type Config = {
-  mappings: {[key: string]: Function & {ObjectCreator?: ObjectCreator}},
+  mappings: {[key: string]: MappingEntry},
   creators?: {[key: string]: ObjectCreator},
   errorLogger?: Function,
   typeKey?: string,
 }
 
-export interface IJsonOBjectBase {
+export interface IJsonObject {
   _deferDeserializing?: boolean;
   deserializeObject(): Promise<any>;
   rawData(): any;

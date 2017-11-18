@@ -1,5 +1,14 @@
 /** @flow */
 
+/*
+ * Copyright (c) (2017)
+ *
+ *  Written by Aikar <aikar@aikar.co>
+ *
+ *  @license MIT
+ *
+ */
+
 import type {DataParameter} from "./index";
 
 export class ObjectCreator {

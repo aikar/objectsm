@@ -3,6 +3,7 @@ node_modules/
 dist/
 
 [include]
+src/
 
 [libs]
 flow-typed/
