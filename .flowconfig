@@ -1,9 +1,9 @@
 [ignore]
-node_modules/
-dist/
+.*/dist/.*
 
 [include]
-src/
+.*/src/.*
+.*/example/.*
 
 [libs]
 flow-typed/

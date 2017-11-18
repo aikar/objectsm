@@ -12,7 +12,7 @@
 import {ObjectCreator} from "./creators";
 import {JsonObject, JsonObjectBase} from "./json-object";
 
-export type MappingEntry = (Class<any> | Function) & $Shape<{ObjectCreator?: ObjectCreator}>;
+export type MappingEntry = (Class<any> | Function) & $Shape<{ObjectCreator: ObjectCreator}>;
 export type Config = {
   mappings: {[key: string]: MappingEntry},
   creators?: {[key: string]: ObjectCreator},
@@ -22,9 +22,9 @@ export type Config = {
 
 export interface IJsonObject {
   _deferDeserializing?: boolean;
-  deserializeObject: () => Promise<any>;
-  rawData: () => any;
-  onDeserialize: ?() => any;
+  deserializeObject?: () => Promise<any>;
+  rawData?: () => any;
+  onDeserialize?: () => any;
 }
 
 export {JsonObject, JsonObjectBase};

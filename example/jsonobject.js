@@ -9,17 +9,19 @@
  *
  */
 
+// $FlowFixMe
 const JsonObject = global.devNodeUseDist ? require("../dist/index").JsonObject : require("../src/index").JsonObject;
+import type {IJsonObject} from "../src/index";
 
-class Test2 {
+class Test2 implements IJsonObject {
   baz: string;
 }
 
-class Test3 {
+class Test3 implements IJsonObject {
   qux: number;
 }
 
-class Test1 {
+class Test1 implements IJsonObject {
   foo: Test2;
   bar: Test3;
 }
