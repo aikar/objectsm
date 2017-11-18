@@ -22,12 +22,7 @@ module.exports = {
     }],
   ],
   plugins: [
-    ["transform-runtime", {
-      "helpers": false,
-      "polyfill": false,
-      "regenerator": true,
-      "moduleName": "babel-runtime"
-    }],
+    "transform-runtime",
     "transform-flow-strip-types",
     "transform-export-extensions",
     "syntax-dynamic-import",
