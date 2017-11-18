@@ -34,14 +34,16 @@ class Test1 extends JsonObjectBase {
   bar: Test3;
 }
 
-const testJson = new JsonObject({
-  mappings: {
-    "test1": Test1,
-    "test2": Test2,
-    "test3": Test3,
-    "test4": Test4,
-  }
+const mappings = {
+  "test1": Test1,
+  "test2": Test2,
+  "test3": Test3,
+  "test4": Test4,
+};
+const deserializer = new JsonObject({
+  mappings,
 });
+
 const testData = {
   ":cls": "test1",
   "foo": {
@@ -57,27 +59,43 @@ const testData = {
     }
   }
 };
-let result;
+let deserialized;
 beforeAll(async () => {
-  return result = await testJson.deserializeObject(testData);
+  deserialized = await deserializer.deserialize(testData);
 });
 
-describe("Deserializing", async () => {
+describe("Deserializing", () => {
   test('instanceof', function () {
-    expect(result instanceof Test1).toBe(true);
-    expect(result.foo instanceof Test2).toBe(true);
-    expect(result.bar instanceof Test3).toBe(true);
-    expect(result.bar.test4 instanceof Test4).toBe(true);
+    expect(deserialized instanceof Test1).toBe(true);
+    expect(deserialized.foo instanceof Test2).toBe(true);
+    expect(deserialized.bar instanceof Test3).toBe(true);
+    expect(deserialized.bar.test4 instanceof Test4).toBe(true);
   });
   test('constructors are correct', function () {
-    expect(result.constructor.name).toEqual("Test1");
-    expect(result.foo.constructor.name).toEqual("Test2");
-    expect(result.bar.constructor.name).toEqual("Test3");
-    expect(result.bar.test4.constructor.name).toEqual("Test4");
+    expect(deserialized.constructor.name).toEqual("Test1");
+    expect(deserialized.foo.constructor.name).toEqual("Test2");
+    expect(deserialized.bar.constructor.name).toEqual("Test3");
+    expect(deserialized.bar.test4.constructor.name).toEqual("Test4");
   });
   test('values are correct', function () {
-    expect(result.foo.baz).toEqual("Hello");
-    expect(result.bar.qux).toEqual(42);
-    expect(result.bar.test4.hello).toEqual("world! with special");
+    expect(deserialized.foo.baz).toEqual("Hello");
+    expect(deserialized.bar.qux).toEqual(42);
+    expect(deserialized.bar.test4.hello).toEqual("world! with special");
   });
 });
+/*
+describe("Serializing", () => {
+  test("Matches original", async () => {
+    const serialized = await deserializer.serialize(deserialized);
+    expect(testData).toEqual(serialized);
+  });
+  test("Uses configured type key", async () => {
+    const serializer = new JsonObject({
+      mappings,
+      typeKey: ":test"
+    });
+    const serialized = await serializer.serialize(deserialized);
+    expect(Object.keys(serialized)).toContain(":test");
+  });
+});
+*/

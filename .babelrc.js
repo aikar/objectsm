@@ -1,5 +1,3 @@
-const engines = require("./package.json").engines;
-
 module.exports = {
   babelrc: false,
   presets: [
@@ -30,7 +28,5 @@ module.exports = {
     "transform-object-rest-spread",
     "syntax-trailing-function-commas",
     "transform-exponentiation-operator",
-//            "source-map-support"
   ]
-
 };
