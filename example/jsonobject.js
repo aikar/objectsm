@@ -12,20 +12,16 @@
 const JsonObject = global.devNodeUseDist ? require("../dist/index").JsonObject : require("../src/index").JsonObject;
 
 class Test2 {
-  /** @type string */
-  baz;
+  baz: string;
 }
 
 class Test3 {
-  /** @type int */
-  qux;
+  qux: number;
 }
 
 class Test1 {
-  /** @type Test2 */
-  foo;
-  /** @type Test3 */
-  bar;
+  foo: Test2;
+  bar: Test3;
 }
 
 const test = new JsonObject({
