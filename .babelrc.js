@@ -1,4 +1,3 @@
-const deepmerge = require('deepmerge');
 const engines = require("./package.json").engines;
 
 module.exports = {
