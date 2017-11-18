@@ -57,16 +57,27 @@ const testData = {
     }
   }
 };
+let result;
+beforeAll(async () => {
+  return result = await testJson.deserializeObject(testData);
+});
 
-test('Deserializes', async function testRun() {
-  const result = await testJson.deserializeObject(testData);
-  expect(result instanceof Test1).toBe(true);
-  expect(result.foo instanceof Test2).toBe(true);
-  expect(result.bar instanceof Test3).toBe(true);
-  expect(result.bar.test4 instanceof Test4).toBe(true);
-  expect(result.bar.test4.hello).toEqual("world! with special");
-  expect(result.constructor.name).toEqual("Test1");
-  expect(result.foo.constructor.name).toEqual("Test2");
-  expect(result.bar.constructor.name).toEqual("Test3");
-  expect(result.bar.test4.constructor.name).toEqual("Test4");
+describe("Deserializing", async () => {
+  test('instanceof', function () {
+    expect(result instanceof Test1).toBe(true);
+    expect(result.foo instanceof Test2).toBe(true);
+    expect(result.bar instanceof Test3).toBe(true);
+    expect(result.bar.test4 instanceof Test4).toBe(true);
+  });
+  test('constructors are correct', function () {
+    expect(result.constructor.name).toEqual("Test1");
+    expect(result.foo.constructor.name).toEqual("Test2");
+    expect(result.bar.constructor.name).toEqual("Test3");
+    expect(result.bar.test4.constructor.name).toEqual("Test4");
+  });
+  test('values are correct', function () {
+    expect(result.foo.baz).toEqual("Hello");
+    expect(result.bar.qux).toEqual(42);
+    expect(result.bar.test4.hello).toEqual("world! with special");
+  });
 });
