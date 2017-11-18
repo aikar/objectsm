@@ -1,4 +1,6 @@
 # jsonobject
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/aikar/json-object.svg)](https://greenkeeper.io/)
 JSON Object Serializer/Deserializer to convert raw JS objects back into class/constructor form
 
 This library lets you define models as JavaScript classes, complete with methods/defaults and ability to post process the data.
