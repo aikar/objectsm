@@ -595,6 +595,10 @@ babel-plugin-syntax-exponentiation-operator@7.0.0-beta.0:
   version "7.0.0-beta.0"
   resolved "https://registry.yarnpkg.com/babel-plugin-syntax-exponentiation-operator/-/babel-plugin-syntax-exponentiation-operator-7.0.0-beta.0.tgz#0e09f65168b7dd2cc73ad7af547036ff128eb7d6"
 
+babel-plugin-syntax-export-extensions@7.0.0-alpha.19:
+  version "7.0.0-alpha.19"
+  resolved "https://registry.yarnpkg.com/babel-plugin-syntax-export-extensions/-/babel-plugin-syntax-export-extensions-7.0.0-alpha.19.tgz#aa9d3a2bf6cfb34973f045991c2f8ee76e16443a"
+
 babel-plugin-syntax-export-extensions@7.0.0-beta.3:
   version "7.0.0-beta.3"
   resolved "https://registry.yarnpkg.com/babel-plugin-syntax-export-extensions/-/babel-plugin-syntax-export-extensions-7.0.0-beta.3.tgz#eb6891a63f86652e2f09c332f2ff06a83c07da28"
@@ -818,6 +822,12 @@ babel-plugin-transform-export-default@7.0.0-beta.3:
   resolved "https://registry.yarnpkg.com/babel-plugin-transform-export-default/-/babel-plugin-transform-export-default-7.0.0-beta.3.tgz#ab53d924fd4dc774e20e059ada1624b87d1a0001"
   dependencies:
     babel-plugin-syntax-export-extensions "7.0.0-beta.3"
+
+babel-plugin-transform-export-extensions@^7.0.0-alpha.19:
+  version "7.0.0-alpha.19"
+  resolved "https://registry.yarnpkg.com/babel-plugin-transform-export-extensions/-/babel-plugin-transform-export-extensions-7.0.0-alpha.19.tgz#664ed4cd942838bee1287ff81588905614b644aa"
+  dependencies:
+    babel-plugin-syntax-export-extensions "7.0.0-alpha.19"
 
 babel-plugin-transform-export-namespace@7.0.0-beta.3:
   version "7.0.0-beta.3"
