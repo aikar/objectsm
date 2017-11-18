@@ -9,7 +9,7 @@
  *
  */
 
-const JsonObject = !global.devNodeUseDist ? require("../src/index").JsonObject : require("../dist/index").JsonObject;
+const JsonObject = global.devNodeUseDist ? require("../dist/index").JsonObject : require("../src/index").JsonObject;
 
 class Test2 {
   /** @type string */

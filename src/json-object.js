@@ -37,7 +37,8 @@ export class JsonObject {
     }
 
     // $FlowFixMe
-    for (const [id, obj] of (Object.entries(mappings): Array<[string, MappingEntry]>)) {
+    const entries = (Object.entries(mappings): any);
+    for (const [id, obj] of (entries: Array<[string, MappingEntry]>)) {
       this.id2ObjMap.set(id, obj);
       this.obj2IdMap.set(obj, id);
       let creator = creators[id] || DefaultObjectCreator;
@@ -122,14 +123,14 @@ export class JsonObject {
   async _deserializeObject(tpl: IJsonObject) {
     const queue = [];
     if (tpl.onDeserialize != null) {
-      queue.push(() => tpl.onDeserialize());
+      queue.push(tpl.onDeserialize.bind(tpl));
     }
     const promise = queueDeserialize(tpl, queue);
     await this.processQueue(queue);
     Object.defineProperty(tpl, 'deserializeObject', {
       enumerable: false,
       configurable: true,
-      value: async function () {
+      value: async function (): Promise<any> {
         await promise;
         return tpl;
       }
@@ -185,12 +186,12 @@ export class JsonObject {
 export class JsonObjectBase implements IJsonObject {
 
   /* abstract - will be injected from JsonObject */
-  async deserializeObject() {}
+  deserializeObject = async () => {};
 
   /* abstract - will be injected from JsonObject */
-  rawData() {}
+  rawData = () => {};
 
-  onDeserialize() {}
+  onDeserialize = () => {};
 }
 
 type QueuedDeserialize = Function | {idx: any, val: any};
