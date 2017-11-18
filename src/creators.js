@@ -13,14 +13,15 @@ import type {DataParameter} from "./index";
 
 export class ObjectCreator {
 
-  createObject(objCls: Function, data: DataParameter): any {
-    const tpl = Object.create(objCls.prototype);
+  createObject(objCls: Function, data: DataParameter): Promise<any> | any {
+    const obj = Object.create(objCls.prototype);
 
     for (const [key, val] of Object.entries(data)) {
-      tpl[key] = val;
+      obj[key] = val;
     }
-    return tpl;
+    return obj;
   }
+  onDeserialize(obj: any): Promise<void> | void {}
 }
 
 /**

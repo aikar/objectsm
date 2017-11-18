@@ -75,12 +75,12 @@ export class JsonObject {
     if (Array.isArray(data)) {
       for (let i = 0; i < data.length; i++) {
         const arrData = data[i];
-        data[i] = this.createObject(arrData);
+        data[i] = await this.createObject(arrData, queue);
       }
       await this.processQueue(queue);
       return data;
     } else {
-      const obj = this.createObject(data);
+      const obj = await this.createObject(data, queue);
       await this.processQueue(queue);
       return obj;
     }
@@ -95,16 +95,13 @@ export class JsonObject {
     let item;
     while ((item = queue.pop())) {
       if (typeof item === 'function') {
-        item();
+        await Promise.resolve(item());
         continue;
       }
       const thisIdx = item.idx;
-      if (!item.val) {
-        this.logger(item);
-      }
       const thisData = item.val[thisIdx];
       if (thisData[this.typeKey]) {
-        item.val[thisIdx] = this.createObject(thisData);
+        item.val[thisIdx] = await this.createObject(thisData, queue);
       } else if (typeof item.val[thisIdx] === 'object') {
         queueDeserialize(item.val[thisIdx], queue);
       }
@@ -117,34 +114,36 @@ export class JsonObject {
   }
 
   /**
-   * @param {JsonObjectBase} tpl
+   * @param {JsonObjectBase} obj
+   * @param creator
+   * @param queue
    * @returns {JsonObjectBase}
    */
-  async _deserializeObject(tpl: IJsonObject) {
-    const queue = [];
-    if (tpl.onDeserialize != null) {
-      queue.push(tpl.onDeserialize.bind(tpl));
-    }
-    const promise = queueDeserialize(tpl, queue);
-    await this.processQueue(queue);
-    Object.defineProperty(tpl, 'deserializeObject', {
+  async _deserializeObject(obj: IJsonObject, creator: ObjectCreator, queue: Array<QueuedDeserialize>) {
+
+    queueDeserialize(obj, queue);
+    queue.push(async () => await Promise.resolve(creator.onDeserialize(obj)));
+    const promise = this.processQueue(queue);
+
+    Object.defineProperty(obj, 'deserializeObject', {
       enumerable: false,
       configurable: true,
       value: async function (): Promise<any> {
         await promise;
-        return tpl;
+        return obj;
       }
     });
     await promise;
 
-    return tpl;
+    return obj;
   }
 
   /**
    * @param data
+   * @param queue
    * @returns {JsonObjectBase}
    */
-  createObject(data: DataParameter) {
+  async createObject(data: DataParameter, queue: Array<QueuedDeserialize>) {
     const id = data[this.typeKey];
     const objCls = this.id2ObjMap.get(id);
     const creator = this.objCreators.get(id);
@@ -155,28 +154,28 @@ export class JsonObject {
         throw new Error("Invalid Object Creator for " + id);
       }
 
-      const tpl = creator.createObject(objCls, data);
-      const deferDeserializing = tpl._deferDeserializing;
+      const obj = await Promise.resolve(creator.createObject(objCls, data));
+      const deferDeserializing = obj._deferDeserializing;
 
       delete data[this.typeKey];
-      delete tpl['_deferDeserializing'];
+      delete obj['_deferDeserializing'];
 
-      Object.defineProperty(tpl, 'rawData', {
+      Object.defineProperty(obj, 'rawData', {
         enumerable: false,
         configurable: true,
         value: () => data
       });
 
-      Object.defineProperty(tpl, 'deserializeObject', {
-        enumerable: false,
-        configurable: true,
-        value: () => this._deserializeObject(tpl)
-      });
-
       if (!deferDeserializing) {
-        tpl.deserializeObject().catch(e => this.logger("Error deserializing object", e));
+        this._deserializeObject(obj, creator, queue);
+      } else {
+        Object.defineProperty(obj, 'deserializeObject', {
+          enumerable: false,
+          configurable: true,
+          value: async () => this._deserializeObject(obj, creator, [])
+        });
       }
-      return tpl;
+      return obj;
     }
     this.logger("Unknown Class Data:", id, data);
     throw new Error("Unknown class ID:" + id);
@@ -202,23 +201,19 @@ type QueuedDeserialize = Function | {idx: any, val: any};
  * @param {QueuedDeserialize[]} queue
  */
 function queueDeserialize(obj: DataParameter, queue: Array<QueuedDeserialize>) {
-  return new Promise((a) => {
-    if (Array.isArray(obj)) {
-      for (let i = 0; i < obj.length; i++) {
-        if (obj[i] && typeof obj[i] === 'object') {
-          queue.push({idx: i, val: obj});
-        }
-      }
-    } else {
-      for (const [key, val] of Object.entries(obj)) {
-        if (val && typeof val === 'object') {
-          queue.push({idx: key, val: obj});
-        }
+  if (Array.isArray(obj)) {
+    for (let i = 0; i < obj.length; i++) {
+      if (obj[i] && typeof obj[i] === 'object') {
+        queue.push({idx: i, val: obj});
       }
     }
-    queue.push(() => a());
-  });
-
+  } else {
+    for (const [key, val] of Object.entries(obj)) {
+      if (val && typeof val === 'object') {
+        queue.push({idx: key, val: obj});
+      }
+    }
+  }
 }
 
 function waitFor(ms) {

@@ -9,9 +9,9 @@
     "lint": "gulp lint",
     "node": "cross-env NODE_ENV=development build/devnode.js",
     "postpack": "build/postpack.sh",
-    "example": "cross-env NODE_ENV=development build/devnode.js example/jsonobject.js",
-    "distexample": "cross-env NODE_ENV=development build/devnode.js example/jsonobject.js --use-dist",
-    "start": "cross-env NODE_ENV=development build/devnode.js src/jsonobject.js"
+    "example": "cross-env NODE_ENV=development build/devnode.js example/example.js",
+    "distexample": "cross-env NODE_ENV=development build/devnode.js example/example.js --use-dist",
+    "start": "npm run example"
   },
   "repository": {
     "type": "git",

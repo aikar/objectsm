@@ -10,18 +10,17 @@
  */
 
 // $FlowFixMe
-const JsonObject = global.devNodeUseDist ? require("../dist/index").JsonObject : require("../src/index").JsonObject;
-import type {IJsonObject} from "../src/index";
+const {JsonObject, JsonObjectBase} = global.devNodeUseDist ? require("../dist/index") : require("../src/index");
 
-class Test2 implements IJsonObject {
+class Test2 extends JsonObjectBase {
   baz: string;
 }
 
-class Test3 implements IJsonObject {
+class Test3 extends JsonObjectBase {
   qux: number;
 }
 
-class Test1 implements IJsonObject {
+class Test1 extends JsonObjectBase {
   foo: Test2;
   bar: Test3;
 }

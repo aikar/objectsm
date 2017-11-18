@@ -22,9 +22,8 @@ export type Config = {
 
 export interface IJsonObject {
   _deferDeserializing?: boolean;
-  deserializeObject?: () => Promise<any>;
-  rawData?: () => any;
-  onDeserialize?: () => any;
+  deserializeObject: () => Promise<any>;
+  rawData: () => any;
 }
 
 export {JsonObject, JsonObjectBase};
