@@ -1,6 +1,6 @@
 {
   "name": "jsonobject",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "JSON Object Serializer/Deserializer to convert raw JS objects back into class/constructor form",
   "main": "index.js",
   "scripts": {
@@ -8,6 +8,7 @@
     "build": "gulp build",
     "lint": "gulp lint",
     "node": "cross-env NODE_ENV=development build/devnode.js",
+    "prepack": "npm run build",
     "postpack": "build/postpack.sh",
     "start": "jest"
   },
@@ -15,6 +16,9 @@
     "type": "git",
     "url": "git+https://github.com/aikar/json-object.git"
   },
+  "files": [
+    "dist", "LICENSE", "README.md"
+  ],
   "keywords": [
     "json",
     "object",
