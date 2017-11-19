@@ -141,7 +141,7 @@ export class JsonObject {
    * @returns {JsonObjectBase}
    */
   async createObject(data: DataParameter, queue: Array<Function>) {
-    const id = data[this.typeKey];
+    const id = String(data[this.typeKey]);
     const objCls = this.id2ObjMap.get(id);
     const creator = this.objCreators.get(id);
 
