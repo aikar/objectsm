@@ -218,7 +218,7 @@ export class JsonObject {
     if (Array.isArray(obj)) {
       for (let i = 0; i < obj.length; i++) {
         if (typeof obj[i] === 'object') {
-          this.queueObject(obj[i], queue, func);
+          queue.push(func.bind(this, obj, i, queue));
         }
       }
     } else {

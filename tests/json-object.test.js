@@ -51,10 +51,15 @@ const deserializer = new JsonObject({
 
 const testData = {
   ":cls": "test1",
-  "foo": {
-    ":cls": "test2",
-    "baz": "Hello"
-  },
+  "foo": [
+    {
+      ":cls": "test2",
+      "baz": "Hello1"
+    },
+    {
+      ":cls": "test2",
+      "baz": "Hello2"
+    }],
   "bar": {
     ":cls": "test3",
     "qux": 42,
@@ -71,19 +76,23 @@ beforeAll(async () => {
 
 describe("Deserializing", () => {
   test('instanceof', function () {
-    expect(deserialized instanceof Test1).toBe(true);
-    expect(deserialized.foo instanceof Test2).toBe(true);
-    expect(deserialized.bar instanceof Test3).toBe(true);
-    expect(deserialized.bar.test4 instanceof Test4).toBe(true);
+    expect(deserialized).toBeInstanceOf(Test1);
+    expect(deserialized.foo).toBeInstanceOf(Array);
+    expect(deserialized.foo[0]).toBeInstanceOf(Test2);
+    expect(deserialized.foo[1]).toBeInstanceOf(Test2);
+    expect(deserialized.bar).toBeInstanceOf(Test3);
+    expect(deserialized.bar.test4).toBeInstanceOf(Test4);
   });
   test('Constructors are correct', function () {
     expect(deserialized.constructor.name).toEqual("Test1");
-    expect(deserialized.foo.constructor.name).toEqual("Test2");
+    expect(deserialized.foo[0].constructor.name).toEqual("Test2");
+    expect(deserialized.foo[1].constructor.name).toEqual("Test2");
     expect(deserialized.bar.constructor.name).toEqual("Test3");
     expect(deserialized.bar.test4.constructor.name).toEqual("Test4");
   });
   test('Values are correct', function () {
-    expect(deserialized.foo.baz).toEqual("Hello");
+    expect(deserialized.foo[0].baz).toEqual("Hello1");
+    expect(deserialized.foo[1].baz).toEqual("Hello2");
     expect(deserialized.bar.qux).toEqual(42);
     expect(deserialized.bar.test4.hello).toEqual("world! with special");
   });
