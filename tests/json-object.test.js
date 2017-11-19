@@ -49,17 +49,18 @@ const deserializer = new JsonObject({
   mappings,
 });
 
+const testFoo = [
+  {
+    ":cls": "test2",
+    "baz": "Hello1"
+  },
+  {
+    ":cls": "test2",
+    "baz": "Hello2"
+  }];
 const testData = {
   ":cls": "test1",
-  "foo": [
-    {
-      ":cls": "test2",
-      "baz": "Hello1"
-    },
-    {
-      ":cls": "test2",
-      "baz": "Hello2"
-    }],
+  "foo": testFoo,
   "bar": {
     ":cls": "test3",
     "qux": 42,
@@ -69,6 +70,7 @@ const testData = {
     }
   }
 };
+const orig = JSON.parse(JSON.stringify(testData));
 let deserialized;
 beforeAll(async () => {
   deserialized = await deserializer.deserialize(testData);
@@ -95,6 +97,13 @@ describe("Deserializing", () => {
     expect(deserialized.foo[1].baz).toEqual("Hello2");
     expect(deserialized.bar.qux).toEqual(42);
     expect(deserialized.bar.test4.hello).toEqual("world! with special");
+  });
+  test("deserializing root array", async () => {
+    const arr = await deserializer.deserialize(testFoo);
+    console.log(arr);
+  });
+  test("Deserialize doesn't mutate original data", () => {
+    expect(testData).toEqual(orig);
   });
 });
 

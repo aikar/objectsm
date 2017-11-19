@@ -77,7 +77,7 @@ export class JsonObject {
     if (Array.isArray(data)) {
       for (let i = 0; i < data.length; i++) {
         if (typeof data[i] === 'object') {
-          data[i] = await this.createObject(data[i], queue);
+          obj[i] = await this.createObject(obj[i], queue);
           this.queueObject(data[i], queue, this.deserializeItem);
         }
       }
