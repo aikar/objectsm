@@ -9,6 +9,7 @@
  *
  */
 import "regenerator-runtime/runtime";
+import objEntries from "object.entries";
 import {DefaultObjectCreator, MapObjectCreator, ObjectCreator, SetObjectCreator} from "./creators";
 import type {Config, DataParameter, IJsonObject, MappingEntry} from "./index";
 import clone from "clone";
@@ -38,7 +39,7 @@ export class JsonObject {
     }
 
     // $FlowFixMe
-    const entries = (Object.entries(mappings): any);
+    const entries = (objEntries(mappings): any);
     for (const [id, obj] of (entries: Array<[string, MappingEntry]>)) {
       this.id2ObjMap.set(id, obj);
       this.obj2IdMap.set(obj, id);
@@ -196,7 +197,7 @@ export class JsonObject {
       } else {
         const id = this.obj2IdMap.get(origVal.constructor);
 
-        for (const [key, val] of Object.entries(data)) {
+        for (const [key, val] of objEntries(data)) {
           this.serializeItem(val, origVal[key]);
         }
 
@@ -222,7 +223,7 @@ export class JsonObject {
         }
       }
     } else {
-      for (const [key, val] of Object.entries(obj)) {
+      for (const [key, val] of objEntries(obj)) {
         if (val && typeof val === 'object') {
           queue.push(func.bind(this, obj, key, queue));
         }
