@@ -8,7 +8,7 @@
  *  @license MIT
  *
  */
-
+import "regenerator-runtime/runtime";
 import {DefaultObjectCreator, MapObjectCreator, ObjectCreator, SetObjectCreator} from "./creators";
 import type {Config, DataParameter, IJsonObject, MappingEntry} from "./index";
 import clone from "clone";
