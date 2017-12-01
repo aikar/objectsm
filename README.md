@@ -1,6 +1,11 @@
 # jsonobject
-
+[![Build Status](https://travis-ci.org/aikar/json-object.svg?branch=master)](https://travis-ci.org/aikar/json-object)
+[![npm version](https://img.shields.io/npm/v//jsonobject.svg)](https://www.npmjs.org/package/jsonobject)
+[![Downloads](https://img.shields.io/npm/dt/jsonobject.svg)](https://www.npmjs.org/package/jsonobject)
+[![GitHub issues](https://img.shields.io/github/issues/aikar/json-object.svg)](https://github.com/aikar/json-object/issues)
+[![GitHub license](https://img.shields.io/github/license/aikar/json-object.svg)](https://github.com/aikar/json-object/blob/master/LICENSE)
 [![Greenkeeper badge](https://badges.greenkeeper.io/aikar/json-object.svg)](https://greenkeeper.io/)
+
 JSON Object Serializer/Deserializer to convert raw JS objects back into class/constructor form
 
 This library lets you define models as JavaScript classes, complete with methods/defaults and ability to post process the data.

@@ -8,13 +8,15 @@
  *  @license MIT
  *
  */
-
+import "regenerator-runtime/runtime";
+import objEntries from "object.entries";
 import {DefaultObjectCreator, MapObjectCreator, ObjectCreator, SetObjectCreator} from "./creators";
 import type {Config, DataParameter, IJsonObject, MappingEntry} from "./index";
+import clone from "clone";
+import toJson from "object-tojson";
 
 export class JsonObject {
 
-  deserializedCount: number = 0;
   typeKey: string;
   id2ObjMap: Map<string, Function> = new Map();
   obj2IdMap: Map<Function, string> = new Map();
@@ -37,7 +39,7 @@ export class JsonObject {
     }
 
     // $FlowFixMe
-    const entries = (Object.entries(mappings): any);
+    const entries = (objEntries(mappings): any);
     for (const [id, obj] of (entries: Array<[string, MappingEntry]>)) {
       this.id2ObjMap.set(id, obj);
       this.obj2IdMap.set(obj, id);
@@ -70,58 +72,54 @@ export class JsonObject {
    * @param data
    * @returns {*}
    */
-  async deserializeObject(data: DataParameter) {
+  async deserialize(data: DataParameter) {
+    let obj = clone(data);
     const queue = [];
     if (Array.isArray(data)) {
       for (let i = 0; i < data.length; i++) {
-        const arrData = data[i];
-        data[i] = await this.createObject(arrData, queue);
+        if (typeof data[i] === 'object') {
+          obj[i] = await this.createObject(obj[i], queue);
+          this.queueObject(data[i], queue, this.deserializeItem);
+        }
       }
-      await this.processQueue(queue);
-      return data;
     } else {
-      const obj = await this.createObject(data, queue);
-      await this.processQueue(queue);
-      return obj;
+      obj = await this.createObject(obj, queue);
+      this.queueObject(obj, queue, this.deserializeItem);
     }
+
+    await this.processQueue(queue);
+    return obj;
   }
 
   /**
    *
-   * @param {QueuedDeserialize[]} queue
+   * @param queue
    * @returns {Promise.<void>}
    */
-  async processQueue(queue: Array<QueuedDeserialize>) {
+  async processQueue(queue: Array<Function>) {
     let item;
     while ((item = queue.pop())) {
-      if (typeof item === 'function') {
-        await Promise.resolve(item());
-        continue;
-      }
-      const thisIdx = item.idx;
-      const thisData = item.val[thisIdx];
-      if (thisData[this.typeKey]) {
-        item.val[thisIdx] = await this.createObject(thisData, queue);
-      } else if (typeof item.val[thisIdx] === 'object') {
-        queueDeserialize(item.val[thisIdx], queue);
-      }
-
-      if (this.deserializedCount++ > 10000 && queue.length) {
-        await waitFor(2);
-        this.deserializedCount = 0;
+      const promise = item();
+      if (promise && promise.then) {
+        await promise;
       }
     }
+  }
+
+  async serialize(data: DataParameter): Promise<any> {
+    const json = toJson(data);
+    this.serializeItem(json, data);
+    return json;
   }
 
   /**
    * @param {JsonObjectBase} obj
    * @param creator
-   * @param queue
    * @returns {JsonObjectBase}
    */
-  async _deserializeObject(obj: IJsonObject, creator: ObjectCreator, queue: Array<QueuedDeserialize>) {
-
-    queueDeserialize(obj, queue);
+  async _deserializeObject(obj: IJsonObject, creator: ObjectCreator) {
+    const queue = [];
+    this.queueObject(obj, queue, this.deserializeItem);
     queue.push(async () => await Promise.resolve(creator.onDeserialize(obj)));
     const promise = this.processQueue(queue);
 
@@ -143,8 +141,8 @@ export class JsonObject {
    * @param queue
    * @returns {JsonObjectBase}
    */
-  async createObject(data: DataParameter, queue: Array<QueuedDeserialize>) {
-    const id = data[this.typeKey];
+  async createObject(data: DataParameter, queue: Array<Function>) {
+    const id = String(data[this.typeKey]);
     const objCls = this.id2ObjMap.get(id);
     const creator = this.objCreators.get(id);
 
@@ -153,11 +151,11 @@ export class JsonObject {
         this.logger("Invalid Object Creator for", id,  objCls);
         throw new Error("Invalid Object Creator for " + id);
       }
+      delete data[this.typeKey];
 
       const obj = await Promise.resolve(creator.createObject(objCls, data));
       const deferDeserializing = obj._deferDeserializing;
 
-      delete data[this.typeKey];
       delete obj['_deferDeserializing'];
 
       Object.defineProperty(obj, 'rawData', {
@@ -167,18 +165,70 @@ export class JsonObject {
       });
 
       if (!deferDeserializing) {
-        this._deserializeObject(obj, creator, queue);
+        queue.push(() => this._deserializeObject(obj, creator));
       } else {
         Object.defineProperty(obj, 'deserializeObject', {
           enumerable: false,
           configurable: true,
-          value: async () => this._deserializeObject(obj, creator, [])
+          value: () => this._deserializeObject(obj, creator)
         });
       }
       return obj;
     }
     this.logger("Unknown Class Data:", id, data);
     throw new Error("Unknown class ID:" + id);
+  }
+
+  async deserializeItem(val: DataParameter, idx: string, queue: Array<Function>) {
+    const thisData = val[idx];
+    if (thisData[this.typeKey]) {
+      val[idx] = await this.createObject(thisData, queue);
+    } else if (typeof val[idx] === 'object') {
+      this.queueObject(val[idx], queue, this.deserializeItem);
+    }
+  }
+
+  serializeItem(data: DataParameter, origVal: DataParameter) {
+    if (typeof data === 'object') {
+      if (Array.isArray(data)) {
+        for (let i = 0; i < data.length; i++) {
+          this.serializeItem(data[i], origVal[i]);
+        }
+      } else {
+        const id = this.obj2IdMap.get(origVal.constructor);
+
+        for (const [key, val] of objEntries(data)) {
+          this.serializeItem(val, origVal[key]);
+        }
+
+        if (id) {
+          data[this.typeKey] = id;
+          const creator = this.objCreators.get(id);
+          creator.serializeObject(origVal.constructor, data);
+        }
+      }
+    }
+  }
+
+  /**
+   * @param {object,object[]} obj
+   * @param queue
+   * @param func
+   */
+  queueObject(obj: DataParameter, queue: Array<Function>, func: Function) {
+    if (Array.isArray(obj)) {
+      for (let i = 0; i < obj.length; i++) {
+        if (typeof obj[i] === 'object') {
+          queue.push(func.bind(this, obj, i, queue));
+        }
+      }
+    } else {
+      for (const [key, val] of objEntries(obj)) {
+        if (val && typeof val === 'object') {
+          queue.push(func.bind(this, obj, key, queue));
+        }
+      }
+    }
   }
 }
 
@@ -193,29 +243,3 @@ export class JsonObjectBase implements IJsonObject {
   onDeserialize = () => {};
 }
 
-type QueuedDeserialize = Function | {idx: any, val: any};
-
-
-/**
- * @param {object,object[]} obj
- * @param {QueuedDeserialize[]} queue
- */
-function queueDeserialize(obj: DataParameter, queue: Array<QueuedDeserialize>) {
-  if (Array.isArray(obj)) {
-    for (let i = 0; i < obj.length; i++) {
-      if (obj[i] && typeof obj[i] === 'object') {
-        queue.push({idx: i, val: obj});
-      }
-    }
-  } else {
-    for (const [key, val] of Object.entries(obj)) {
-      if (val && typeof val === 'object') {
-        queue.push({idx: key, val: obj});
-      }
-    }
-  }
-}
-
-function waitFor(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}

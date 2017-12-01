@@ -10,17 +10,23 @@
  */
 
 import type {DataParameter} from "./index";
+import objEntries from "object.entries";
 
 export class ObjectCreator {
 
   createObject(objCls: Function, data: DataParameter): Promise<any> | any {
     const obj = Object.create(objCls.prototype);
 
-    for (const [key, val] of Object.entries(data)) {
+    for (const [key, val] of objEntries(data)) {
       obj[key] = val;
     }
     return obj;
   }
+
+  serializeObject(objCls: Function, data: DataParameter): void {
+
+  }
+
   onDeserialize(obj: any): Promise<void> | void {}
 }
 
@@ -36,7 +42,7 @@ export const DefaultObjectCreator = new ObjectCreator();
  */
 export const MapObjectCreator = new (class extends ObjectCreator {
   createObject(objCls: Function, data: DataParameter): any {
-    return new Map(Object.entries(data));
+    return new Map(objEntries(data));
   }
 })();
 

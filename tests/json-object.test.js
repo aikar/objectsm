@@ -21,6 +21,11 @@ class Test4 extends JsonObjectBase {
       obj.hello += " with special";
       return obj;
     }
+
+    serializeObject(objCls: Function, data: DataParameter): void {
+      super.serializeObject(objCls, data);
+      data.hello = data.hello.replace(/ with special/, '');
+    }
   })();
 }
 
@@ -34,20 +39,28 @@ class Test1 extends JsonObjectBase {
   bar: Test3;
 }
 
-const testJson = new JsonObject({
-  mappings: {
-    "test1": Test1,
-    "test2": Test2,
-    "test3": Test3,
-    "test4": Test4,
-  }
+const mappings = {
+  "test1": Test1,
+  "test2": Test2,
+  "test3": Test3,
+  "test4": Test4,
+};
+const deserializer = new JsonObject({
+  mappings,
 });
+
+const testFoo = [
+  {
+    ":cls": "test2",
+    "baz": "Hello1"
+  },
+  {
+    ":cls": "test2",
+    "baz": "Hello2"
+  }];
 const testData = {
   ":cls": "test1",
-  "foo": {
-    ":cls": "test2",
-    "baz": "Hello"
-  },
+  "foo": testFoo,
   "bar": {
     ":cls": "test3",
     "qux": 42,
@@ -57,27 +70,55 @@ const testData = {
     }
   }
 };
-let result;
+const orig = JSON.parse(JSON.stringify(testData));
+let deserialized;
 beforeAll(async () => {
-  return result = await testJson.deserializeObject(testData);
+  deserialized = await deserializer.deserialize(testData);
 });
 
-describe("Deserializing", async () => {
+describe("Deserializing", () => {
   test('instanceof', function () {
-    expect(result instanceof Test1).toBe(true);
-    expect(result.foo instanceof Test2).toBe(true);
-    expect(result.bar instanceof Test3).toBe(true);
-    expect(result.bar.test4 instanceof Test4).toBe(true);
+    expect(deserialized).toBeInstanceOf(Test1);
+    expect(deserialized.foo).toBeInstanceOf(Array);
+    expect(deserialized.foo[0]).toBeInstanceOf(Test2);
+    expect(deserialized.foo[1]).toBeInstanceOf(Test2);
+    expect(deserialized.bar).toBeInstanceOf(Test3);
+    expect(deserialized.bar.test4).toBeInstanceOf(Test4);
   });
-  test('constructors are correct', function () {
-    expect(result.constructor.name).toEqual("Test1");
-    expect(result.foo.constructor.name).toEqual("Test2");
-    expect(result.bar.constructor.name).toEqual("Test3");
-    expect(result.bar.test4.constructor.name).toEqual("Test4");
+  test('Constructors are correct', function () {
+    expect(deserialized.constructor.name).toEqual("Test1");
+    expect(deserialized.foo[0].constructor.name).toEqual("Test2");
+    expect(deserialized.foo[1].constructor.name).toEqual("Test2");
+    expect(deserialized.bar.constructor.name).toEqual("Test3");
+    expect(deserialized.bar.test4.constructor.name).toEqual("Test4");
   });
-  test('values are correct', function () {
-    expect(result.foo.baz).toEqual("Hello");
-    expect(result.bar.qux).toEqual(42);
-    expect(result.bar.test4.hello).toEqual("world! with special");
+  test('Values are correct', function () {
+    expect(deserialized.foo[0].baz).toEqual("Hello1");
+    expect(deserialized.foo[1].baz).toEqual("Hello2");
+    expect(deserialized.bar.qux).toEqual(42);
+    expect(deserialized.bar.test4.hello).toEqual("world! with special");
+  });
+  test("deserializing root array", async () => {
+    const arr = await deserializer.deserialize(testFoo);
+    console.log(arr);
+  });
+  test("Deserialize doesn't mutate original data", () => {
+    expect(testData).toEqual(orig);
   });
 });
+
+describe("Serializing", () => {
+  test("Matches original", async () => {
+    const serialized = await deserializer.serialize(deserialized);
+    expect(serialized).toEqual(testData);
+  });
+  test("Uses configured type key", async () => {
+    const serializer = new JsonObject({
+      mappings,
+      typeKey: ":test"
+    });
+    const serialized = await serializer.serialize(deserialized);
+    expect(Object.keys(serialized)).toContain(":test");
+  });
+});
+

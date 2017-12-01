@@ -1,12 +1,10 @@
-const engines = require("./package.json").engines;
-
 module.exports = {
   babelrc: false,
   presets: [
     ["env", {
       loose: true,
       modules: "commonjs",
-      useBuiltIns: "entry",
+      useBuiltIns: "usage",
       include: [],
       targets: {
         node: 6,
@@ -22,7 +20,6 @@ module.exports = {
     }],
   ],
   plugins: [
-    "transform-runtime",
     "transform-flow-strip-types",
     "transform-export-extensions",
     "syntax-dynamic-import",
@@ -30,7 +27,5 @@ module.exports = {
     "transform-object-rest-spread",
     "syntax-trailing-function-commas",
     "transform-exponentiation-operator",
-//            "source-map-support"
   ]
-
 };
