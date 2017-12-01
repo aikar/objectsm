@@ -4,6 +4,7 @@
 [![Downloads](https://img.shields.io/npm/dt/jsonobject.svg)](https://www.npmjs.org/package/jsonobject)
 [![GitHub issues](https://img.shields.io/github/issues/aikar/json-object.svg)](https://github.com/aikar/json-object/issues)
 [![GitHub license](https://img.shields.io/github/license/aikar/json-object.svg)](https://github.com/aikar/json-object/blob/master/LICENSE)
+[![Greenkeeper badge](https://badges.greenkeeper.io/aikar/json-object.svg)](https://greenkeeper.io/)
 
 JSON Object Serializer/Deserializer to convert raw JS objects back into class/constructor form
 
