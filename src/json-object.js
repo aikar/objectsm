@@ -17,6 +17,7 @@ import toJson from "object-tojson";
 
 export class JsonObject {
 
+  config: Config;
   typeKey: string;
   id2ObjMap: Map<string, Function> = new Map();
   obj2IdMap: Map<Function, string> = new Map();
@@ -25,12 +26,12 @@ export class JsonObject {
 
 
   constructor(config: Config) {
+    this.config = config;
     const mappings = {
       "__MAP": Map,
       "__SET": Set,
       ...(config.mappings || {})
     };
-    const creators = config.creators || {};
     this.objCreators.set("__MAP", MapObjectCreator);
     this.objCreators.set("__SET", SetObjectCreator);
 
@@ -41,22 +42,25 @@ export class JsonObject {
     // $FlowFixMe
     const entries = (objEntries(mappings): any);
     for (const [id, obj] of (entries: Array<[string, MappingEntry]>)) {
-      this.id2ObjMap.set(id, obj);
-      this.obj2IdMap.set(obj, id);
-      let creator = creators[id] || DefaultObjectCreator;
-      if (obj.ObjectCreator) {
-        if (obj.ObjectCreator.createObject) {
-          creator = obj.ObjectCreator;
-        } else {
-          this.logger("Invalid ObjectCreator defined on " + obj.name + " - must implement createObject");
-        }
-      }
-      this.objCreators.set(id, creator);
+      this.addMapping(id, obj);
     }
 
     this.typeKey = config.typeKey || ":cls";
   }
-
+  addMapping(id: string, obj: MappingEntry): void {
+    this.id2ObjMap.set(id, obj);
+    this.obj2IdMap.set(obj, id);
+    const creators = this.config.creators || {};
+    let creator = creators[id] || DefaultObjectCreator;
+    if (obj.ObjectCreator) {
+      if (obj.ObjectCreator.createObject) {
+        creator = obj.ObjectCreator;
+      } else {
+        this.logger("Invalid ObjectCreator defined on " + obj.name + " - must implement createObject");
+      }
+    }
+    this.objCreators.set(id, creator);
+  }
   /**
    * Asynchronously create a JSON represented object.
    *
@@ -141,7 +145,7 @@ export class JsonObject {
    * @param queue
    * @returns {JsonObjectBase}
    */
-  async createObject(data: DataParameter, queue: Array<Function>) {
+  async createObject(data: any, queue: Array<Function>) {
     const id = String(data[this.typeKey]);
     const objCls = this.id2ObjMap.get(id);
     const creator = this.objCreators.get(id);
@@ -179,7 +183,7 @@ export class JsonObject {
     throw new Error("Unknown class ID:" + id);
   }
 
-  async deserializeItem(val: DataParameter, idx: string, queue: Array<Function>) {
+  async deserializeItem(val: any, idx: string, queue: Array<Function>) {
     const thisData = val[idx];
     if (thisData[this.typeKey]) {
       val[idx] = await this.createObject(thisData, queue);
@@ -188,7 +192,7 @@ export class JsonObject {
     }
   }
 
-  serializeItem(data: DataParameter, origVal: DataParameter) {
+  serializeItem(data: any, origVal: any) {
     if (typeof data === 'object') {
       if (Array.isArray(data)) {
         for (let i = 0; i < data.length; i++) {
@@ -203,7 +207,7 @@ export class JsonObject {
 
         if (id) {
           data[this.typeKey] = id;
-          const creator = this.objCreators.get(id);
+          const creator = this.objCreators.get(id) || DefaultObjectCreator;
           creator.serializeObject(origVal.constructor, data);
         }
       }

@@ -43,11 +43,11 @@ const mappings = {
   "test1": Test1,
   "test2": Test2,
   "test3": Test3,
-  "test4": Test4,
 };
 const deserializer = new JsonObject({
   mappings,
 });
+deserializer.addMapping("test4", Test4);
 
 const testFoo = [
   {
