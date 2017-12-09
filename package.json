@@ -4,9 +4,10 @@
   "description": "JSON Object Serializer/Deserializer to convert raw JS objects back into class/constructor form",
   "main": "index.js",
   "scripts": {
-    "test": "gulp lint && jest",
+    "test": "gulp validate && jest",
     "build": "gulp build",
-    "lint": "gulp lint",
+    "validate": "gulp validate",
+    "line": "gulp validate",
     "node": "cross-env NODE_ENV=development build/devnode.js",
     "prepack": "npm run build",
     "postpack": "build/postpack.sh",
