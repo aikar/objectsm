@@ -47,6 +47,11 @@ export class JsonObject {
 
     this.typeKey = config.typeKey || ":cls";
   }
+
+  hasMapping(id: string): boolean {
+    return this.objCreators.has(id);
+  }
+
   addMapping(id: string, obj: MappingEntry): void {
     this.id2ObjMap.set(id, obj);
     this.obj2IdMap.set(obj, id);
@@ -61,6 +66,7 @@ export class JsonObject {
     }
     this.objCreators.set(id, creator);
   }
+
   /**
    * Asynchronously create a JSON represented object.
    *

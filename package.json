@@ -1,6 +1,6 @@
 {
   "name": "jsonobject",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "description": "JSON Object Serializer/Deserializer to convert raw JS objects back into class/constructor form",
   "main": "index.js",
   "scripts": {
