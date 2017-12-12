@@ -16,14 +16,15 @@ class Test2 extends JsonObjectBase {
 class Test4 extends JsonObjectBase {
   hello: string;
   static ObjectCreator = new (class extends ObjectCreator {
-    createObject(objCls: Function, data: DataParameter): Promise<any> | any {
-      const obj = super.createObject(objCls, data);
+    async createObject(objCls: Function, data: DataParameter): Promise<any> | any {
+      const obj = await Promise.resolve(super.createObject(objCls, data));
       obj.hello += " with special";
       return obj;
     }
 
     serializeObject(objCls: Function, data: DataParameter): void {
       super.serializeObject(objCls, data);
+      // $FlowFixMe
       data.hello = data.hello.replace(/ with special/, '');
     }
   })();
@@ -100,7 +101,10 @@ describe("Deserializing", () => {
   });
   test("deserializing root array", async () => {
     const arr = await deserializer.deserialize(testFoo);
-    console.log(arr);
+    expect(arr[0]).toBeInstanceOf(Test2);
+    expect(arr[1]).toBeInstanceOf(Test2);
+    expect(arr[0].baz).toEqual("Hello1");
+    expect(arr[1].baz).toEqual("Hello2");
   });
   test("Deserialize doesn't mutate original data", () => {
     expect(testData).toEqual(orig);
@@ -119,6 +123,20 @@ describe("Serializing", () => {
     });
     const serialized = await serializer.serialize(deserialized);
     expect(Object.keys(serialized)).toContain(":test");
+  });
+  test("input with functions", async () => {
+    const obj = {
+      test: 1,
+      foo() {
+
+      },
+      bar: () => {
+
+      },
+      baz: "42"
+    };
+    const result = await deserializer.serialize(obj);
+    expect(result).toEqual({test: 1, baz: "42"});
   });
 });
 
