@@ -199,7 +199,7 @@ export class JsonObject {
   }
 
   serializeItem(data: any, origVal: any) {
-    if (typeof data === 'object') {
+    if (data != null && origVal != null && typeof data === 'object' && typeof origVal === 'object') {
       if (Array.isArray(data)) {
         for (let i = 0; i < data.length; i++) {
           this.serializeItem(data[i], origVal[i]);

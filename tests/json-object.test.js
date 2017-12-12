@@ -53,7 +53,8 @@ deserializer.addMapping("test4", Test4);
 const testFoo = [
   {
     ":cls": "test2",
-    "baz": "Hello1"
+    "baz": "Hello1",
+    "qux": null,
   },
   {
     ":cls": "test2",
