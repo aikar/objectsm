@@ -10,8 +10,8 @@
  */
 import "regenerator-runtime/runtime";
 import objEntries from "object.entries";
-import {DefaultObjectCreator, MapObjectCreator, ObjectCreator, SetObjectCreator} from "./creators";
-import type {Config, DataParameter, IJsonObject, MappingEntry} from "./index";
+import {DateObjectCreator, DefaultObjectCreator, MapObjectCreator, ObjectCreator, SetObjectCreator} from "./creators";
+import type {Config, DataParameter, DataParameterArray, IJsonObject, MappingEntry} from "./index";
 import clone from "clone";
 import toJson from "object-tojson";
 
@@ -30,10 +30,12 @@ export class JsonObject {
     const mappings = {
       "__MAP": Map,
       "__SET": Set,
+      "__DATE": Date,
       ...(config.mappings || {})
     };
     this.objCreators.set("__MAP", MapObjectCreator);
     this.objCreators.set("__SET", SetObjectCreator);
+    this.objCreators.set("__DATE", DateObjectCreator);
 
     if (config.errorLogger) {
       this.logger = config.errorLogger;
@@ -56,7 +58,7 @@ export class JsonObject {
     this.id2ObjMap.set(id, obj);
     this.obj2IdMap.set(obj, id);
     const creators = this.config.creators || {};
-    let creator = creators[id] || DefaultObjectCreator;
+    let creator = creators[id] || this.objCreators.get(id) || DefaultObjectCreator;
     if (obj.ObjectCreator) {
       if (obj.ObjectCreator.createObject) {
         creator = obj.ObjectCreator;
@@ -82,7 +84,7 @@ export class JsonObject {
    * @param data
    * @returns {*}
    */
-  async deserialize(data: DataParameter) {
+  async deserialize(data: DataParameter | DataParameterArray) {
     let obj = clone(data);
     const queue = [];
     if (Array.isArray(data)) {
@@ -116,7 +118,7 @@ export class JsonObject {
     }
   }
 
-  async serialize(data: DataParameter): Promise<any> {
+  async serialize(data: DataParameter | DataParameterArray): Promise<any> {
     const json = toJson(data);
     this.serializeItem(json, data);
     return json;
@@ -199,25 +201,30 @@ export class JsonObject {
   }
 
   serializeItem(data: any, origVal: any) {
-    if (data != null && origVal != null && typeof data === 'object' && typeof origVal === 'object') {
+
+    if (origVal != null && typeof origVal === 'object') {
+      const id = this.obj2IdMap.get(origVal.constructor);
+      if (id) {
+        const creator = this.objCreators.get(id) || DefaultObjectCreator;
+        data = creator.serializeObject(origVal.constructor, data, origVal) || data || {};
+        data[this.typeKey] = id;
+      }
+      if (data == null || typeof data !== 'object') {
+        return data;
+      }
+
       if (Array.isArray(data)) {
         for (let i = 0; i < data.length; i++) {
-          this.serializeItem(data[i], origVal[i]);
+          data[i] = this.serializeItem(data[i], origVal[i]);
         }
       } else {
-        const id = this.obj2IdMap.get(origVal.constructor);
-
         for (const [key, val] of objEntries(data)) {
-          this.serializeItem(val, origVal[key]);
-        }
-
-        if (id) {
-          data[this.typeKey] = id;
-          const creator = this.objCreators.get(id) || DefaultObjectCreator;
-          creator.serializeObject(origVal.constructor, data);
+          data[key] = this.serializeItem(val, origVal[key]);
         }
       }
     }
+    return data;
+
   }
 
   /**
@@ -252,4 +259,3 @@ export class JsonObjectBase implements IJsonObject {
 
   onDeserialize = () => {};
 }
-

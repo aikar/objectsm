@@ -22,10 +22,11 @@ class Test4 extends JsonObjectBase {
       return obj;
     }
 
-    serializeObject(objCls: Function, data: DataParameter): void {
-      super.serializeObject(objCls, data);
+    serializeObject(objCls: Function, data: DataParameter, origValue: any): {[string]: any} {
+      data = super.serializeObject(objCls, data);
       // $FlowFixMe
       data.hello = data.hello.replace(/ with special/, '');
+      return data;
     }
   })();
 }
@@ -66,6 +67,7 @@ const testData = {
   "bar": {
     ":cls": "test3",
     "qux": 42,
+    "date": {":cls": "__DATE", "date": "2017-01-01T00:10:00.000Z"},
     "test4": {
       ":cls": "test4",
       "hello": "world!"

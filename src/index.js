@@ -29,4 +29,5 @@ export interface IJsonObject {
 export {JsonObject, JsonObjectBase, ObjectCreator};
 export default JsonObject;
 
-export type DataParameter = {[key: string]: any} | Array<DataParameter | any>;
+export type DataParameter = {[key: string]: any};
+export type DataParameterArray = Array<DataParameter | any>

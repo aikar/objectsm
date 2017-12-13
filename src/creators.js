@@ -23,8 +23,8 @@ export class ObjectCreator {
     return obj;
   }
 
-  serializeObject(objCls: Function, data: DataParameter): void {
-
+  serializeObject(objCls: Function, data: DataParameter, origData: any): {[string]: any} {
+    return data;
   }
 
   onDeserialize(obj: any): Promise<void> | void {}
@@ -53,5 +53,17 @@ export const MapObjectCreator = new (class extends ObjectCreator {
 export const SetObjectCreator = new (class extends ObjectCreator {
   createObject(objCls: Function, data: DataParameter): any {
     return new Set(data);
+  }
+})();
+
+export const DateObjectCreator = new (class extends ObjectCreator {
+  createObject(objCls: Function, data: DataParameter) {
+    return new Date(data['date']);
+  }
+
+  serializeObject(objCls: Function, data: DataParameter, origData: any): {[string]: any} {
+    return {
+      date: data
+    };
   }
 })();
