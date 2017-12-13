@@ -12,7 +12,7 @@
 import {ObjectCreator} from "./creators";
 import {JsonObject, JsonObjectBase} from "./json-object";
 
-export type MappingEntry = (Class<any> | Function) & $Shape<{ObjectCreator: ObjectCreator}>;
+export type MappingEntry = (Class<any> | Function) & $Shape<{name: string, ObjectCreator: ObjectCreator}>;
 export type Config = {
   mappings: {[key: string]: MappingEntry},
   creators?: {[key: string]: ObjectCreator},

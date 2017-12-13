@@ -1,9 +1,9 @@
 [ignore]
-.*/dist/.*
+<PROJECT_ROOT>/dist/
 
 [include]
-.*/src/.*
-.*/example/.*
+<PROJECT_ROOT>/src/
+<PROJECT_ROOT>/example/
 
 [libs]
 flow-typed/
