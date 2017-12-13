@@ -4,7 +4,7 @@
   "description": "JSON Object Serializer/Deserializer to convert raw JS objects back into class/constructor form",
   "main": "index.js",
   "scripts": {
-    "test": "gulp validate && jest",
+    "test": "flow && jest",
     "build": "gulp build",
     "validate": "gulp validate",
     "line": "gulp validate",
