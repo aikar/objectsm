@@ -50,8 +50,12 @@ export class JsonObject {
     this.typeKey = config.typeKey || ":cls";
   }
 
-  hasMapping(id: string): boolean {
-    return this.objCreators.has(id);
+  hasMapping(id: Function | string): boolean {
+    if (typeof id === 'string') {
+      return this.id2ObjMap.has(id);
+    } else {
+      return this.obj2IdMap.has(id);
+    }
   }
 
   addMapping(id: string, obj: MappingEntry): void {

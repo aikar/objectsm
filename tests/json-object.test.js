@@ -40,6 +40,7 @@ class Test1 extends JsonObjectBase {
   foo: Test2;
   bar: Test3;
 }
+class NotRegistered {}
 
 const mappings = {
   "test1": Test1,
@@ -80,6 +81,14 @@ beforeAll(async () => {
   deserialized = await deserializer.deserialize(testData);
 });
 
+describe("Base API", () => {
+  test("hasMapping", () => {
+    expect(deserializer.hasMapping("test2")).toBe(true);
+    expect(deserializer.hasMapping("fake_value")).toBe(false);
+    expect(deserializer.hasMapping(Test2)).toBe(true);
+    expect(deserializer.hasMapping(NotRegistered)).toBe(false);
+  });
+});
 describe("Deserializing", () => {
   test('instanceof', function () {
     expect(deserialized).toBeInstanceOf(Test1);
