@@ -158,6 +158,9 @@ export class JsonObject {
    * @returns {JsonObjectBase}
    */
   async createObject(data: any, queue: Array<Function>) {
+    if (data[this.typeKey] == null) {
+      return data;
+    }
     const id = String(data[this.typeKey]);
     const objCls = this.id2ObjMap.get(id);
     const creator = this.objCreators.get(id);
@@ -196,9 +199,8 @@ export class JsonObject {
   }
 
   async deserializeItem(val: any, idx: string, queue: Array<Function>) {
-    const thisData = val[idx];
-    if (thisData[this.typeKey]) {
-      val[idx] = await this.createObject(thisData, queue);
+    if (val[idx][this.typeKey]) {
+      val[idx] = await this.createObject(val[idx], queue);
     } else if (typeof val[idx] === 'object') {
       this.queueObject(val[idx], queue, this.deserializeItem);
     }

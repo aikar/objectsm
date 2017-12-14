@@ -62,7 +62,7 @@ const testFoo = [
     ":cls": "test2",
     "baz": "Hello2"
   }];
-const testData = {
+const testData = {test: {
   ":cls": "test1",
   "foo": testFoo,
   "bar": {
@@ -74,7 +74,7 @@ const testData = {
       "hello": "world!"
     }
   }
-};
+}};
 const orig = JSON.parse(JSON.stringify(testData));
 let deserialized;
 beforeAll(async () => {
@@ -91,25 +91,25 @@ describe("Base API", () => {
 });
 describe("Deserializing", () => {
   test('instanceof', function () {
-    expect(deserialized).toBeInstanceOf(Test1);
-    expect(deserialized.foo).toBeInstanceOf(Array);
-    expect(deserialized.foo[0]).toBeInstanceOf(Test2);
-    expect(deserialized.foo[1]).toBeInstanceOf(Test2);
-    expect(deserialized.bar).toBeInstanceOf(Test3);
-    expect(deserialized.bar.test4).toBeInstanceOf(Test4);
+    expect(deserialized.test).toBeInstanceOf(Test1);
+    expect(deserialized.test.foo).toBeInstanceOf(Array);
+    expect(deserialized.test.foo[0]).toBeInstanceOf(Test2);
+    expect(deserialized.test.foo[1]).toBeInstanceOf(Test2);
+    expect(deserialized.test.bar).toBeInstanceOf(Test3);
+    expect(deserialized.test.bar.test4).toBeInstanceOf(Test4);
   });
   test('Constructors are correct', function () {
-    expect(deserialized.constructor.name).toEqual("Test1");
-    expect(deserialized.foo[0].constructor.name).toEqual("Test2");
-    expect(deserialized.foo[1].constructor.name).toEqual("Test2");
-    expect(deserialized.bar.constructor.name).toEqual("Test3");
-    expect(deserialized.bar.test4.constructor.name).toEqual("Test4");
+    expect(deserialized.test.constructor.name).toEqual("Test1");
+    expect(deserialized.test.foo[0].constructor.name).toEqual("Test2");
+    expect(deserialized.test.foo[1].constructor.name).toEqual("Test2");
+    expect(deserialized.test.bar.constructor.name).toEqual("Test3");
+    expect(deserialized.test.bar.test4.constructor.name).toEqual("Test4");
   });
   test('Values are correct', function () {
-    expect(deserialized.foo[0].baz).toEqual("Hello1");
-    expect(deserialized.foo[1].baz).toEqual("Hello2");
-    expect(deserialized.bar.qux).toEqual(42);
-    expect(deserialized.bar.test4.hello).toEqual("world! with special");
+    expect(deserialized.test.foo[0].baz).toEqual("Hello1");
+    expect(deserialized.test.foo[1].baz).toEqual("Hello2");
+    expect(deserialized.test.bar.qux).toEqual(42);
+    expect(deserialized.test.bar.test4.hello).toEqual("world! with special");
   });
   test("deserializing root array", async () => {
     const arr = await deserializer.deserialize(testFoo);
@@ -134,7 +134,7 @@ describe("Serializing", () => {
       typeKey: ":test"
     });
     const serialized = await serializer.serialize(deserialized);
-    expect(Object.keys(serialized)).toContain(":test");
+    expect(Object.keys(serialized.test)).toContain(":test");
   });
   test("input with functions", async () => {
     const obj = {
