@@ -49,6 +49,7 @@ const mappings = {
 };
 const deserializer = new JsonObject({
   mappings,
+  errorOnUnknownType: false,
 });
 deserializer.addMapping("test4", Test4);
 
@@ -73,7 +74,7 @@ const testData = {test: {
       ":cls": "test4",
       "hello": "world!"
     }
-  }
+  }, unknown: {":cls": "dwfewfwefwef", bar: 1},
 }};
 const orig = JSON.parse(JSON.stringify(testData));
 let deserialized;

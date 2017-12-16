@@ -23,6 +23,7 @@ export class JsonObject {
   obj2IdMap: Map<Function, string> = new Map();
   logger: Function = console.error.bind(console, "[JsonObject]");
   objCreators: Map<string, ObjectCreator> = new Map();
+  errorOnUnknownType: boolean;
 
 
   constructor(config: Config) {
@@ -48,6 +49,7 @@ export class JsonObject {
     }
 
     this.typeKey = config.typeKey || ":cls";
+    this.errorOnUnknownType = Boolean(config.errorOnUnknownType);
   }
 
   hasMapping(id: Function | string): boolean {
@@ -194,8 +196,11 @@ export class JsonObject {
       }
       return obj;
     }
-    this.logger("Unknown Class Data:", id, data);
-    throw new Error("Unknown class ID:" + id);
+    if (this.errorOnUnknownType) {
+      this.logger("Unknown Class Data:", id, data);
+      throw new Error("Unknown class ID:" + id);
+    }
+    return data;
   }
 
   async deserializeItem(val: any, idx: string, queue: Array<Function>) {

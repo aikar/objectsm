@@ -14,10 +14,11 @@ import {JsonObject, JsonObjectBase} from "./json-object";
 
 export type MappingEntry = (Class<any> | Function) & $Shape<{name: string, ObjectCreator: ObjectCreator}>;
 export type Config = {
-  mappings: {[key: string]: MappingEntry},
+  mappings?: {[key: string]: MappingEntry},
   creators?: {[key: string]: ObjectCreator},
   errorLogger?: Function,
   typeKey?: string,
+  errorOnUnknownType?: boolean
 }
 
 export interface IJsonObject {
