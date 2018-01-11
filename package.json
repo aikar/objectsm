@@ -73,7 +73,7 @@
     "gulp-rename": "^1.2.2",
     "gulp-sourcemaps": "^2.6.1",
     "gulp-util": "^3.0.8",
-    "gulp-watch": "^4.3.11",
+    "gulp-watch": "^5.0.0",
     "jest": "^22.0.0",
     "module-alias": "^2.0.2",
     "rimraf": "^2.6.2",
