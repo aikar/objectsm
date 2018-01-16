@@ -9,6 +9,7 @@
  */
 import {JsonObject, JsonObjectBase, ObjectCreator} from "../src/index";
 import type {DataParameter} from "../src";
+import {JsonDataModel} from "../src/base-classes";
 
 class Test2 extends JsonObjectBase {
   baz: string;
@@ -153,3 +154,85 @@ describe("Serializing", () => {
   });
 });
 
+describe("Models", () => {
+  class TestModel extends JsonDataModel {
+    foo = 1;
+    bar = 4;
+    baz = 10;
+    constructor(props) {
+      super();
+      this.withProperties(props);
+    }
+  }
+
+
+  deserializer.addMapping("TestModel", TestModel);
+
+
+  test("Object created correctly", () => {
+    const obj = new TestModel({foo: 2});
+    expect(obj.foo).toEqual(2);
+    expect(obj.bar).toEqual(4);
+    expect(obj.baz).toEqual(10);
+  });
+
+  test("Uses newly provided default", async () => {
+    const obj = await deserializer.deserialize({
+      ":cls": "TestModel",
+      foo: 5,
+    });
+    expect(obj.foo).toEqual(5);
+    expect(obj.bar).toEqual(4);
+    expect(obj.baz).toEqual(10);
+  });
+
+  test("Does not use defaults", async () => {
+    const obj = await deserializer.deserialize({
+      ":cls": "TestModel",
+      foo: 6,
+      bar: 3,
+      baz: null
+    });
+    expect(obj.foo).toEqual(6);
+    expect(obj.bar).toEqual(3);
+    expect(obj.baz).toEqual(null);
+  });
+
+
+  class TestModel2 extends JsonDataModel {
+    foo = 1;
+    bar = 4;
+    baz = 10;
+  }
+  deserializer.addMapping("TestModel2", TestModel2);
+
+  test("No Constructor - Object created correctly", () => {
+    const obj = new TestModel2();
+    expect(obj.foo).toEqual(1);
+    expect(obj.bar).toEqual(4);
+    expect(obj.baz).toEqual(10);
+  });
+
+  test("No Constructor - Uses newly provided default", async () => {
+    const obj = await deserializer.deserialize({
+      ":cls": "TestModel2",
+      foo: 5,
+    });
+    expect(obj.foo).toEqual(5);
+    expect(obj.bar).toEqual(4);
+    expect(obj.baz).toEqual(10);
+  });
+
+  test("No Constructor - Does not use defaults", async () => {
+    const obj = await deserializer.deserialize({
+      ":cls": "TestModel2",
+      foo: 6,
+      bar: 3,
+      baz: null,
+    });
+    expect(obj.foo).toEqual(6);
+    expect(obj.bar).toEqual(3);
+    expect(obj.baz).toEqual(null);
+  });
+
+});

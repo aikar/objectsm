@@ -27,7 +27,11 @@ export class ObjectCreator {
     return data;
   }
 
-  onDeserialize(obj: any): Promise<void> | void {}
+  onDeserialize(obj: any): Promise<void> | void {
+    if (typeof obj.onDeserialize === 'function') {
+      obj.onDeserialize();
+    }
+  }
 }
 
 /**

@@ -15,6 +15,8 @@ import type {Config, DataParameter, DataParameterArray, IJsonObject, MappingEntr
 import clone from "clone";
 import toJson from "object-tojson";
 
+export {JsonObjectBase} from "./base-classes";
+
 export class JsonObject {
 
   config: Config;
@@ -258,15 +260,4 @@ export class JsonObject {
       }
     }
   }
-}
-
-export class JsonObjectBase implements IJsonObject {
-
-  /* abstract - will be injected from JsonObject */
-  deserializeObject = async () => {};
-
-  /* abstract - will be injected from JsonObject */
-  rawData = () => {};
-
-  onDeserialize = () => {};
 }
