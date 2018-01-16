@@ -44,7 +44,7 @@ export const DefaultObjectCreator = new ObjectCreator();
  * Used to deserialize Map objects
  * @type {{createObject: {(Function, DataParameter): any, (Function, DataParameter): any}}}
  */
-export const MapObjectCreator = new (class extends ObjectCreator {
+export const MapObjectCreator = new (class MapObjectCreator extends ObjectCreator {
   createObject(objCls: Function, data: DataParameter): any {
     return new Map(objEntries(data));
   }
@@ -54,13 +54,13 @@ export const MapObjectCreator = new (class extends ObjectCreator {
  * Used to deserialize Set objects
  * @type {{createObject: {(Function, DataParameter): any, (Function, DataParameter): any}}}
  */
-export const SetObjectCreator = new (class extends ObjectCreator {
+export const SetObjectCreator = new (class SetObjectCreator extends ObjectCreator {
   createObject(objCls: Function, data: DataParameter): any {
     return new Set(data);
   }
 })();
 
-export const DateObjectCreator = new (class extends ObjectCreator {
+export const DateObjectCreator = new (class DateObjectCreator extends ObjectCreator {
   createObject(objCls: Function, data: DataParameter) {
     return new Date(data['date']);
   }

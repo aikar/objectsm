@@ -10,6 +10,7 @@
 import {JsonObject, JsonObjectBase, ObjectCreator} from "../src/index";
 import type {DataParameter} from "../src";
 import {JsonDataModel} from "../src/base-classes";
+import {DefaultObjectCreator} from "../src/creators";
 
 class Test2 extends JsonObjectBase {
   baz: string;
@@ -235,4 +236,32 @@ describe("Models", () => {
     expect(obj.baz).toEqual(null);
   });
 
+});
+
+describe("Inheriting Object Creators", () => {
+  class TestModel3 extends JsonDataModel {}
+  class TestModel4 extends TestModel3 {}
+  class TestModel5 extends TestModel4 {
+    static ObjectCreator: any = new (class CustomObjectCreator extends ObjectCreator {
+
+    })();
+  }
+  class TestModel6 extends JsonObjectBase {}
+  deserializer.addMapping("TestModel3", TestModel3);
+  deserializer.addMapping("TestModel4", TestModel4);
+  deserializer.addMapping("TestModel5", TestModel5);
+  deserializer.addMapping("TestModel6", TestModel6);
+
+  test("Model Object Creator", () => {
+    expect(deserializer.objCreators.get("TestModel3")).toEqual(JsonDataModel.ObjectCreator);
+  });
+  test("Model Object Creator depth 2", () => {
+    expect(deserializer.objCreators.get("TestModel4")).toEqual(JsonDataModel.ObjectCreator);
+  });
+  test("Model Object Creator depth 3", () => {
+    expect(deserializer.objCreators.get("TestModel5")).toEqual(TestModel5.ObjectCreator);
+  });
+  test("Standard Object Creator", () => {
+    expect(deserializer.objCreators.get("TestModel6")).toEqual(DefaultObjectCreator);
+  });
 });
