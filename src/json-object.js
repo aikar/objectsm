@@ -15,7 +15,7 @@ import type {Config, DataParameter, DataParameterArray, IJsonObject, MappingEntr
 import clone from "clone";
 import toJson from "object-tojson";
 
-export {JsonObjectBase} from "./base-classes";
+export {JsonObjectBase, JsonDataModel} from "./base-classes";
 
 export class JsonObject {
 
