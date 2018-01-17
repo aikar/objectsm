@@ -28,7 +28,7 @@ export class JsonDataModel {
     }
   }
 
-  static ObjectCreator = new (class JsonModelCreator extends ObjectCreator {
+  static ObjectCreator = new (class JsonDataModelCreator extends ObjectCreator {
     createObject(objCls: Function, data: DataParameter): Promise<any> | any {
       const obj = new objCls(data);
       for (const [key, val] of objEntries(data)) {

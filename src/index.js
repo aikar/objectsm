@@ -10,7 +10,8 @@
  */
 
 import {ObjectCreator} from "./creators";
-import {JsonObject, JsonObjectBase} from "./json-object";
+import {JsonObject} from "./json-object";
+import {JsonObjectBase, JsonDataModel} from "./base-classes";
 
 export type MappingEntry = (Class<any> | Function) & $Shape<{name: string, ObjectCreator: ObjectCreator}>;
 export type Config = {
@@ -27,7 +28,7 @@ export interface IJsonObject {
   rawData: () => any;
 }
 
-export {JsonObject, JsonObjectBase, ObjectCreator};
+export {JsonObject, JsonObjectBase, JsonDataModel, ObjectCreator};
 export default JsonObject;
 
 export type DataParameter = {[key: string]: any};
