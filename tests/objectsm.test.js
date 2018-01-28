@@ -7,15 +7,15 @@
  *  @license MIT
  *
  */
-import {JsonObject, JsonObjectBase, ObjectCreator} from "../src/index";
+import {ObjectManager, ObjectBase, ObjectCreator} from "../src/index";
 import type {DataParameter} from "../src";
-import {JsonDataModel} from "../src/base-classes";
+import {DataModel} from "../src/base-classes";
 import {DefaultObjectCreator} from "../src/creators";
 
-class Test2 extends JsonObjectBase {
+class Test2 extends ObjectBase {
   baz: string;
 }
-class Test4 extends JsonObjectBase {
+class Test4 extends ObjectBase {
   hello: string;
   static ObjectCreator = new (class extends ObjectCreator {
     async createObject(objCls: Function, data: DataParameter): Promise<any> | any {
@@ -33,12 +33,12 @@ class Test4 extends JsonObjectBase {
   })();
 }
 
-class Test3 extends JsonObjectBase {
+class Test3 extends ObjectBase {
   qux: number;
   test4: Test4;
 }
 
-class Test1 extends JsonObjectBase {
+class Test1 extends ObjectBase {
   foo: Test2;
   bar: Test3;
 }
@@ -49,7 +49,7 @@ const mappings = {
   "test2": Test2,
   "test3": Test3,
 };
-const deserializer = new JsonObject({
+const deserializer = new ObjectManager({
   mappings,
   errorOnUnknownType: false,
 });
@@ -132,7 +132,7 @@ describe("Serializing", () => {
     expect(serialized).toEqual(testData);
   });
   test("Uses configured type key", async () => {
-    const serializer = new JsonObject({
+    const serializer = new ObjectManager({
       mappings,
       typeKey: ":test"
     });
@@ -156,7 +156,7 @@ describe("Serializing", () => {
 });
 
 describe("Models", () => {
-  class TestModel extends JsonDataModel {
+  class TestModel extends DataModel {
     foo = 1;
     bar = 4;
     baz = 10;
@@ -200,7 +200,7 @@ describe("Models", () => {
   });
 
 
-  class TestModel2 extends JsonDataModel {
+  class TestModel2 extends DataModel {
     foo = 1;
     bar = 4;
     baz = 10;
@@ -239,24 +239,24 @@ describe("Models", () => {
 });
 
 describe("Inheriting Object Creators", () => {
-  class TestModel3 extends JsonDataModel {}
+  class TestModel3 extends DataModel {}
   class TestModel4 extends TestModel3 {}
   class TestModel5 extends TestModel4 {
     static ObjectCreator: any = new (class CustomObjectCreator extends ObjectCreator {
 
     })();
   }
-  class TestModel6 extends JsonObjectBase {}
+  class TestModel6 extends ObjectBase {}
   deserializer.addMapping("TestModel3", TestModel3);
   deserializer.addMapping("TestModel4", TestModel4);
   deserializer.addMapping("TestModel5", TestModel5);
   deserializer.addMapping("TestModel6", TestModel6);
 
   test("Model Object Creator", () => {
-    expect(deserializer.objCreators.get("TestModel3")).toEqual(JsonDataModel.ObjectCreator);
+    expect(deserializer.objCreators.get("TestModel3")).toEqual(DataModel.ObjectCreator);
   });
   test("Model Object Creator depth 2", () => {
-    expect(deserializer.objCreators.get("TestModel4")).toEqual(JsonDataModel.ObjectCreator);
+    expect(deserializer.objCreators.get("TestModel4")).toEqual(DataModel.ObjectCreator);
   });
   test("Model Object Creator depth 3", () => {
     expect(deserializer.objCreators.get("TestModel5")).toEqual(TestModel5.ObjectCreator);

@@ -10,8 +10,8 @@
  */
 
 import {ObjectCreator} from "./creators";
-import {JsonObject} from "./json-object";
-import {JsonObjectBase, JsonDataModel} from "./base-classes";
+import {ObjectManager} from "./object-manager";
+import {ObjectBase, DataModel} from "./base-classes";
 
 export type MappingEntry = (Class<any> | Function) & $Shape<{name: string, ObjectCreator: ObjectCreator}>;
 export type Config = {
@@ -22,14 +22,14 @@ export type Config = {
   errorOnUnknownType?: boolean
 }
 
-export interface IJsonObject {
+export interface IObjectBase {
   _deferDeserializing?: boolean;
   deserializeObject: () => Promise<any>;
   rawData: () => any;
 }
 
-export {JsonObject, JsonObjectBase, JsonDataModel, ObjectCreator};
-export default JsonObject;
+export {ObjectManager, ObjectBase, DataModel, ObjectCreator};
+export default ObjectManager;
 
 export type DataParameter = {[key: string]: any};
 export type DataParameterArray = Array<DataParameter | any>

@@ -1,14 +1,14 @@
 /** @flow */
-import type {DataParameter, IJsonObject} from "./index";
+import type {DataParameter, IObjectBase} from "./index";
 import {ObjectCreator} from "./creators";
 import objEntries from "object.entries";
 
-export class JsonObjectBase implements IJsonObject {
+export class ObjectBase implements IObjectBase {
 
-  /* abstract - will be injected from JsonObject */
+  /* abstract - will be injected from ObjectManager */
   deserializeObject = async () => {};
 
-  /* abstract - will be injected from JsonObject */
+  /* abstract - will be injected from ObjectManager */
   rawData = () => {};
 
   onDeserialize = () => {};
@@ -19,16 +19,16 @@ export class JsonObjectBase implements IJsonObject {
  * allow populating defaults that may of been added post serialization
  *
  */
-export class JsonDataModel {
+export class DataModel {
 
   withProperties(props: {[key: string]: any}) {
-    for (const [k, v] of Object.entries(props)) {
+    for (const [k, v] of objEntries(props)) {
       // $FlowFixMe
       this[k] = v;
     }
   }
 
-  static ObjectCreator = new (class JsonDataModelCreator extends ObjectCreator {
+  static ObjectCreator = new (class DataModelCreator extends ObjectCreator {
     createObject(objCls: Function, data: DataParameter): Promise<any> | any {
       const obj = new objCls(data);
       for (const [key, val] of objEntries(data)) {

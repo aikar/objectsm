@@ -1,7 +1,7 @@
 {
-  "name": "jsonobject",
+  "name": "objectsm",
   "version": "1.2.2",
-  "description": "JSON Object Serializer/Deserializer to convert raw JS objects back into class/constructor form",
+  "description": "JS Object Serializer/Deserializer Manager to convert JS objects with saved metadata back into instances of the class they were created with. This library intends to behave like PHP serialize/deserialize does.",
   "main": "index.js",
   "scripts": {
     "test": "flow && jest",
@@ -15,7 +15,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aikar/json-object.git"
+    "url": "git+https://github.com/aikar/objectsm.git"
   },
   "files": [
     "dist",
@@ -24,7 +24,9 @@
   ],
   "keywords": [
     "json",
+    "js",
     "object",
+    "php",
     "serializer",
     "deserializer",
     "mapper"
@@ -32,9 +34,9 @@
   "author": "Daniel Ennis <aikar@aikar.co>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/aikar/json-object/issues"
+    "url": "https://github.com/aikar/objectsm/issues"
   },
-  "homepage": "https://github.com/aikar/json-object#readme",
+  "homepage": "https://github.com/aikar/objectsm#readme",
   "engines": {
     "node": ">= 6"
   },

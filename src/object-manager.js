@@ -11,19 +11,19 @@
 import "regenerator-runtime/runtime";
 import objEntries from "object.entries";
 import {DateObjectCreator, DefaultObjectCreator, MapObjectCreator, ObjectCreator, SetObjectCreator} from "./creators";
-import type {Config, DataParameter, DataParameterArray, IJsonObject, MappingEntry} from "./index";
+import type {Config, DataParameter, DataParameterArray, IObjectBase, MappingEntry} from "./index";
 import clone from "clone";
 import toJson from "object-tojson";
 
-export {JsonObjectBase, JsonDataModel} from "./base-classes";
+export {ObjectBase, DataModel} from "./base-classes";
 
-export class JsonObject {
+export class ObjectManager {
 
   config: Config;
   typeKey: string;
   id2ObjMap: Map<string, Function> = new Map();
   obj2IdMap: Map<Function, string> = new Map();
-  logger: Function = console.error.bind(console, "[JsonObject]");
+  logger: Function = console.error.bind(console, "[JSObjectManager]");
   objCreators: Map<string, ObjectCreator> = new Map();
   errorOnUnknownType: boolean;
 
@@ -133,11 +133,11 @@ export class JsonObject {
   }
 
   /**
-   * @param {JsonObjectBase} obj
+   * @param {ObjectBase} obj
    * @param creator
-   * @returns {JsonObjectBase}
+   * @returns {ObjectBase}
    */
-  async _deserializeObject(obj: IJsonObject, creator: ObjectCreator) {
+  async _deserializeObject(obj: IObjectBase, creator: ObjectCreator) {
     const queue = [];
     this.queueObject(obj, queue, this.deserializeItem);
     queue.push(async () => await Promise.resolve(creator.onDeserialize(obj)));
@@ -159,7 +159,7 @@ export class JsonObject {
   /**
    * @param data
    * @param queue
-   * @returns {JsonObjectBase}
+   * @returns {ObjectBase}
    */
   async createObject(data: any, queue: Array<Function>) {
     if (data[this.typeKey] == null) {
