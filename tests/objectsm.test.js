@@ -52,31 +52,32 @@ const mappings = {
 const deserializer = new ObjectManager({
   mappings,
   errorOnUnknownType: false,
+  defaultNamespace: "objectsm-ns"
 });
 deserializer.addMapping("test4", Test4);
 
 const testFoo = [
   {
-    ":cls": "test2",
+    ":cls": "objectsm-ns:::test2",
     "baz": "Hello1",
     "qux": null,
   },
   {
-    ":cls": "test2",
+    ":cls": "objectsm-ns:::test2",
     "baz": "Hello2"
   }];
 const testData = {test: {
-  ":cls": "test1",
+  ":cls": "objectsm-ns:::test1",
   "foo": testFoo,
   "bar": {
-    ":cls": "test3",
+    ":cls": "objectsm-ns:::test3",
     "qux": 42,
     "date": {":cls": "__DATE", "date": "2017-01-01T00:10:00.000Z"},
     "test4": {
-      ":cls": "test4",
+      ":cls": "objectsm-ns:::test4",
       "hello": "world!"
     }
-  }, unknown: {":cls": "dwfewfwefwef", bar: 1},
+  }, unknown: {":cls": "objectsm-ns:::dwfewfwefwef", bar: 1},
 }};
 const orig = JSON.parse(JSON.stringify(testData));
 let deserialized;
@@ -179,7 +180,7 @@ describe("Models", () => {
 
   test("Uses newly provided default", async () => {
     const obj = await deserializer.deserialize({
-      ":cls": "TestModel",
+      ":cls": "objectsm-ns:::TestModel",
       foo: 5,
     });
     expect(obj.foo).toEqual(5);
@@ -189,7 +190,7 @@ describe("Models", () => {
 
   test("Does not use defaults", async () => {
     const obj = await deserializer.deserialize({
-      ":cls": "TestModel",
+      ":cls": "objectsm-ns:::TestModel",
       foo: 6,
       bar: 3,
       baz: null
@@ -216,7 +217,7 @@ describe("Models", () => {
 
   test("No Constructor - Uses newly provided default", async () => {
     const obj = await deserializer.deserialize({
-      ":cls": "TestModel2",
+      ":cls": "objectsm-ns:::TestModel2",
       foo: 5,
     });
     expect(obj.foo).toEqual(5);
@@ -226,7 +227,7 @@ describe("Models", () => {
 
   test("No Constructor - Does not use defaults", async () => {
     const obj = await deserializer.deserialize({
-      ":cls": "TestModel2",
+      ":cls": "objectsm-ns:::TestModel2",
       foo: 6,
       bar: 3,
       baz: null,
@@ -253,15 +254,56 @@ describe("Inheriting Object Creators", () => {
   deserializer.addMapping("TestModel6", TestModel6);
 
   test("Model Object Creator", () => {
-    expect(deserializer.objCreators.get("TestModel3")).toEqual(DataModel.ObjectCreator);
+    expect(deserializer.objCreators.get("objectsm-ns:::TestModel3")).toEqual(DataModel.ObjectCreator);
   });
   test("Model Object Creator depth 2", () => {
-    expect(deserializer.objCreators.get("TestModel4")).toEqual(DataModel.ObjectCreator);
+    expect(deserializer.objCreators.get("objectsm-ns:::TestModel4")).toEqual(DataModel.ObjectCreator);
   });
   test("Model Object Creator depth 3", () => {
-    expect(deserializer.objCreators.get("TestModel5")).toEqual(TestModel5.ObjectCreator);
+    expect(deserializer.objCreators.get("objectsm-ns:::TestModel5")).toEqual(TestModel5.ObjectCreator);
   });
   test("Standard Object Creator", () => {
-    expect(deserializer.objCreators.get("TestModel6")).toEqual(DefaultObjectCreator);
+    expect(deserializer.objCreators.get("objectsm-ns:::TestModel6")).toEqual(DefaultObjectCreator);
+  });
+});
+describe("Namespaces", () => {
+  class TestNS1 {}
+  class TestNS2 {}
+
+  const ns = new ObjectManager({
+    defaultNamespace: "NS1",
+    mappings: {
+      "Test": TestNS1
+    }
+  });
+  ns.addMapping("Test", TestNS2,  "NS2");
+  test("Registered Correctly", () => {
+    expect(ns.hasMapping("Test", "NS1")).toBeTruthy();
+    expect(ns.hasMapping("Test", "NS2")).toBeTruthy();
+    expect(ns.hasMapping("Test", "NS3")).toBeFalsy();
+    expect(ns.id2ObjMap.get("NS1:::Test")).toEqual(TestNS1);
+    expect(ns.id2ObjMap.get("NS2:::Test")).toEqual(TestNS2);
+  });
+  test("Deserializes Correctly", async () => {
+    const result = await ns.deserialize({
+      default: {":cls": "Test"},
+      ns1: {":cls": "NS1:::Test"},
+      ns2: {":cls": "NS2:::Test"}
+    });
+    expect(result.default).toBeInstanceOf(TestNS1);
+    expect(result.ns1).toBeInstanceOf(TestNS1);
+    expect(result.ns2).toBeInstanceOf(TestNS2);
+  });
+
+  test("Serializes Correctly", async () => {
+    const expected = {
+      ns1: {":cls": "NS1:::Test"},
+      ns2: {":cls": "NS2:::Test"}
+    };
+    const result = await ns.serialize({
+      ns1: new TestNS1(),
+      ns2: new TestNS2(),
+    });
+    expect(result).toEqual(expected);
   });
 });

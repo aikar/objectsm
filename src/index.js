@@ -16,13 +16,16 @@ import toJson from "object-tojson";
 import {ObjectBase, DataModel} from "./base-classes";
 import {DateObjectCreator, DefaultObjectCreator, MapObjectCreator, ObjectCreator, SetObjectCreator} from "./creators";
 
+// $FlowFixMe
 export type MappingEntry = (Class<any> | Function) & $Shape<{name: string, ObjectCreator: ObjectCreator}>;
 export type ObjectManagerConfig = {
   mappings?: {[key: string]: MappingEntry},
   creators?: {[key: string]: ObjectCreator},
   errorLogger?: Function,
   typeKey?: string,
-  errorOnUnknownType?: boolean
+  errorOnUnknownType?: boolean,
+  defaultNamespace?: string,
+  namespaceSeparator?: string,
 }
 
 export interface IObjectBase {
@@ -41,6 +44,8 @@ export class ObjectManager {
 
   config: ObjectManagerConfig;
   typeKey: string;
+  namespaceSeparator: string;
+  defaultNamespace: string;
   id2ObjMap: Map<string, Function> = new Map();
   obj2IdMap: Map<Function, string> = new Map();
   logger: Function = console.error.bind(console, "[JSObjectManager]");
@@ -64,25 +69,46 @@ export class ObjectManager {
       this.logger = config.errorLogger;
     }
 
-    // $FlowFixMe
-    const entries = (objEntries(mappings): any);
-    for (const [id, obj] of (entries: Array<[string, MappingEntry]>)) {
-      this.addMapping(id, obj);
-    }
-
     this.typeKey = config.typeKey || ":cls";
+    this.defaultNamespace = config.defaultNamespace || "";
+    this.namespaceSeparator = config.namespaceSeparator || ":::";
     this.errorOnUnknownType = Boolean(config.errorOnUnknownType);
+
+    this.addMappings(mappings);
   }
 
-  hasMapping(id: Function | string): boolean {
+  hasMapping(id: Function | string, namespace?: string): boolean {
     if (typeof id === 'string') {
+      id = this.namespacedId(id, namespace);
       return this.id2ObjMap.has(id);
     } else {
       return this.obj2IdMap.has(id);
     }
   }
 
-  addMapping(id: string, obj: MappingEntry): void {
+  namespacedId(id: string, namespace?: string) {
+    if (!id) {
+      return id;
+    }
+
+    id = String(id);
+    namespace = namespace || this.defaultNamespace;
+    if (namespace && id.indexOf(this.namespaceSeparator) === -1 && !id.startsWith("__")) {
+      id = namespace + this.namespaceSeparator + id;
+    }
+    return id;
+  }
+
+  addMappings(mappings: {[key: string]: MappingEntry}, namespace?: string) {
+    // $FlowFixMe
+    const entries = (objEntries(mappings): any);
+    for (const [id, obj] of (entries: Array<[string, MappingEntry]>)) {
+      this.addMapping(id, obj, namespace);
+    }
+  }
+
+  addMapping(id: string, obj: MappingEntry, namespace?: string): void {
+    id = this.namespacedId(id, namespace);
     this.id2ObjMap.set(id, obj);
     this.obj2IdMap.set(obj, id);
     const creators = this.config.creators || {};
@@ -185,7 +211,7 @@ export class ObjectManager {
     if (data[this.typeKey] == null) {
       return data;
     }
-    const id = String(data[this.typeKey]);
+    const id = this.namespacedId(String(data[this.typeKey]));
     const objCls = this.id2ObjMap.get(id);
     const creator = this.objCreators.get(id);
 
@@ -281,4 +307,5 @@ export class ObjectManager {
     }
   }
 }
+// noinspection JSUnusedGlobalSymbols
 export default ObjectManager;
