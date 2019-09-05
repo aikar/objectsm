@@ -208,7 +208,7 @@ export class ObjectManager {
    * @returns {ObjectBase}
    */
   async createObject(data: any, queue: Array<Function>) {
-    if (data[this.typeKey] == null) {
+    if (typeof data !== 'object' || data == null || data[this.typeKey] == null) {
       return data;
     }
     const id = this.namespacedId(String(data[this.typeKey]));
