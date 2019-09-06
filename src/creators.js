@@ -48,6 +48,13 @@ export const MapObjectCreator = new (class MapObjectCreator extends ObjectCreato
   createObject(objCls: Function, data: DataParameter): any {
     return new Map(objEntries(data));
   }
+  serializeObject(objCls: Function, data: DataParameter, origData: *): { [p: string]: * } {
+    const obj = {};
+    for (const [key, val] of objEntries(data)) {
+      obj[key] = val;
+    }
+    return obj;
+  }
 })();
 
 /**
@@ -56,7 +63,10 @@ export const MapObjectCreator = new (class MapObjectCreator extends ObjectCreato
  */
 export const SetObjectCreator = new (class SetObjectCreator extends ObjectCreator {
   createObject(objCls: Function, data: DataParameter): any {
-    return new Set(data);
+    return new Set(data.values);
+  }
+  serializeObject(objCls: Function, data: DataParameter, origData: *): { [p: string]: * } {
+    return {values: Array.from(data)};
   }
 })();
 

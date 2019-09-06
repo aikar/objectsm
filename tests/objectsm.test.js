@@ -55,6 +55,13 @@ const deserializer = new ObjectManager({
   defaultNamespace: "objectsm-ns"
 });
 deserializer.addMapping("test4", Test4);
+const set = {
+  foo: 42,
+  test: new Set(),
+};
+let setTest2 = new Test2();
+setTest2.baz = "Hello2";
+set.test.add(setTest2);
 
 const testFoo = [
   {
@@ -125,6 +132,10 @@ describe("Deserializing", () => {
   test("Deserialize doesn't mutate original data", () => {
     expect(testData).toEqual(orig);
   });
+  test("Deserializes Set", async () => {
+    const result = await deserializer.deserialize(await deserializer.serialize(set));
+    expect(result).toEqual(set);
+  });
 });
 
 describe("Serializing", () => {
@@ -154,6 +165,19 @@ describe("Serializing", () => {
     const result = await deserializer.serialize(obj);
     expect(result).toEqual({test: 1, baz: "42"});
   });
+  test("Serializes Set", async () => {
+    const result = await deserializer.serialize(set);
+    expect(result).toEqual({
+      foo: 42,
+      test: {
+        ":cls": "__SET",
+        "values": [{
+          ":cls": "objectsm-ns:::test2",
+          "baz": "Hello2"
+        }]
+      }
+    });
+  })
 });
 
 describe("Models", () => {

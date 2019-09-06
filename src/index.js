@@ -11,7 +11,6 @@
 import "regenerator-runtime/runtime";
 import objEntries from "object.entries";
 import clone from "clone";
-import toJson from "object-tojson";
 
 import {ObjectBase, DataModel} from "./base-classes";
 import {DateObjectCreator, DefaultObjectCreator, MapObjectCreator, ObjectCreator, SetObjectCreator} from "./creators";
@@ -173,7 +172,7 @@ export class ObjectManager {
   }
 
   async serialize(data: DataParameter | DataParameterArray): Promise<any> {
-    const json = toJson(data);
+    const json = toJSON(data);
     this.serializeItem(json, data);
     return json;
   }
@@ -260,9 +259,24 @@ export class ObjectManager {
   }
 
   serializeItem(data: any, origVal: any) {
-
+    if (data == null) {
+      return data;
+    }
     if (origVal != null && typeof origVal === 'object') {
       const id = this.obj2IdMap.get(origVal.constructor);
+      if (data instanceof Map) {
+        data.forEach((value, key) => {
+          data.set(key, this.serializeItem(value, origVal.get(key)));
+        });
+      } else if (data instanceof Set) {
+        const obj = new Set();
+        const origEntries = Array.from(origVal.values());
+        const dataEntries = Array.from(data.values());
+        for (let i = 0; i < dataEntries.length; i++) {
+          obj.add(this.serializeItem(dataEntries[i], origEntries[i]));
+        }
+        data = obj;
+      }
       if (id) {
         const creator = this.objCreators.get(id) || DefaultObjectCreator;
         data = creator.serializeObject(origVal.constructor, data, origVal) || data || {};
@@ -309,3 +323,51 @@ export class ObjectManager {
 }
 // noinspection JSUnusedGlobalSymbols
 export default ObjectManager;
+
+/**
+ * Credit: https://github.com/emilbayes/object-tojson#readme
+ * Updated to add support for Map and Set
+ * @author emilbayes
+ * @license ISC
+ */
+function toJSON (value) {
+  if (value === undefined) return undefined;
+  if (value === null) return null;
+  if (typeof value.toJSON === 'function') return toJSON(value.toJSON());
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number') return isFinite(value) ? value : null;
+  if (typeof value === 'object') {
+    if (Map && value instanceof Map) {
+      const obj = new Map();
+      value.forEach(function (value, key) {
+        obj.set(key, toJSON(value));
+      });
+      return obj;
+    } else if (Set && value instanceof Set) {
+      const obj = new Set();
+      value.forEach(function (value) {
+        obj.add(toJSON(value));
+      });
+      return obj;
+    }
+    if (Array.isArray(value)) return value.map(function (v) { return v === undefined ? null : toJSON(v) });
+    if (Object.prototype.toString.call(value) === '[object Error]') return {};
+    if (Object.prototype.toString.call(value) === '[object Object]') {
+      const obj = {};
+      for (const k in value) {
+        if (value.hasOwnProperty(k)) {
+          // $FlowFixMe
+          const parsed = toJSON(value[k]);
+          // Remove undefined fields
+          if (parsed !== undefined) obj[k] = parsed;
+        }
+      }
+
+      return obj;
+    }
+  }
+
+  // Don't know what to do...
+  return undefined
+}
