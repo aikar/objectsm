@@ -62,7 +62,7 @@
     "eslint-plugin-flowtype-errors": "3.6.0",
     "eslint-plugin-react": "^7.4.0",
     "flow-bin": "0.85.0",
-    "flow-typed": "^2.2.3",
+    "flow-typed": "2.6.1",
     "gulp": "^3.9.1",
     "gulp-babel": "^7.0.0",
     "gulp-bash-completion": "^1.1.0",
