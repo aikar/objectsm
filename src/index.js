@@ -59,7 +59,8 @@ export class ObjectManager {
       "__MAP": Map,
       "__SET": Set,
       "__DATE": Date,
-      ...(config.mappings || {})
+      // $FlowFixMe
+      ...((config.mappings || {}): any)
     };
     this.objCreators.set("__MAP", MapObjectCreator);
     this.objCreators.set("__SET", SetObjectCreator);
