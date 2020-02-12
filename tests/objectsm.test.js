@@ -94,6 +94,10 @@ describe("Base API", () => {
   });
 });
 describe("Deserializing", () => {
+  test("Null Values", async () => {
+    const foo =  {foo: ["bar", null], bar: null};
+    expect(await deserializer.deserialize(foo)).toEqual(foo);
+  });
   test('instanceof', function () {
     expect(deserialized.test).toBeInstanceOf(Test1);
     expect(deserialized.test.foo).toBeInstanceOf(Array);

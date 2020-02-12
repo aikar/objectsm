@@ -140,11 +140,11 @@ export class ObjectManager {
    * @returns {*}
    */
   async deserialize(data: DataParameter | DataParameterArray) {
-    let obj = clone(data);
+    let obj: any = clone(data);
     const queue = [];
     if (Array.isArray(data)) {
       for (let i = 0; i < data.length; i++) {
-        if (typeof data[i] === 'object') {
+        if (typeof data[i] === 'object' && data[i] != null) {
           obj[i] = await this.createObject(obj[i], queue);
           this.queueObject(data[i], queue, this.deserializeItem);
         }
@@ -295,13 +295,13 @@ export class ObjectManager {
   queueObject(obj: DataParameter, queue: Array<Function>, func: Function) {
     if (Array.isArray(obj)) {
       for (let i = 0; i < obj.length; i++) {
-        if (typeof obj[i] === 'object') {
+        if (typeof obj[i] === 'object' && obj[i] != null) {
           queue.push(func.bind(this, obj, i, queue));
         }
       }
     } else {
       for (const [key, val] of objEntries(obj)) {
-        if (val && typeof val === 'object') {
+        if (val != null && typeof val === 'object') {
           queue.push(func.bind(this, obj, key, queue));
         }
       }
