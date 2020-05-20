@@ -85,7 +85,7 @@
     "as-array": "^2.0.0",
     "clone": "^2.1.1",
     "object-tojson": "^1.0.1",
-    "object.entries": "^1.0.4",
+    "object.entries": "^1.1.2",
     "regenerator-runtime": "^0.12.1"
   }
 }
