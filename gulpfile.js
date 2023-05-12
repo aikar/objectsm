@@ -1,4 +1,5 @@
 const gulp = require('gulp');
+const babel = require("gulp-babel");
 const path = require('path');
 const rmrf = require('rimraf');
 const plugins = require("gulp-load-plugins")();
@@ -18,28 +19,27 @@ gulp.task('clean', (cb) => {
     rmrf(dist, cb);
 });
 
-gulp.task('build', ['clean'], (cb) => {
+gulp.task('build', gulp.series('clean', function build(cb) {
     gulp.src(jsFiles)
       .pipe(plugins.sourcemaps.init())
-      .pipe(plugins.babel(require("./.babelrc")))
+      .pipe(babel(require("./babel.config")))
       .pipe(plugins.sourcemaps.write('.'))
       .pipe(gulp.dest(dist))
       .on('end', () => copyFlowDefs(jsFiles, dist, cb));
-});
+}));
 
 gulp.task('validate', () => {
     return pipeEslint(gulp.src(allJsFiles));
 });
 
-gulp.task('validate:watch', ['validate'], () => {
+gulp.task('validate:watch', gulp.series('validate', () => {
     return gulp.watch(allJsFiles, () => {
         return pipeEslint(gulp.src(jsFiles)
           .pipe(plugins.changedInPlace()));
-
     });
-});
+}));
 
-gulp.task('default', ['validate:watch']);
+gulp.task('default', gulp.series('validate:watch'));
 
 
 function copyFlowDefs(src, dest, cb) {

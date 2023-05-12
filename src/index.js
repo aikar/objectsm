@@ -8,8 +8,6 @@
  *  @license MIT
  *
  */
-import "regenerator-runtime/runtime";
-import objEntries from "object.entries";
 import clone from "clone";
 import toJson from "object-tojson";
 
@@ -102,7 +100,7 @@ export class ObjectManager {
 
   addMappings(mappings: {[key: string]: MappingEntry}, namespace?: string) {
     // $FlowFixMe
-    const entries = (objEntries(mappings): any);
+    const entries = (Object.entries(mappings): any);
     for (const [id, obj] of (entries: Array<[string, MappingEntry]>)) {
       this.addMapping(id, obj, namespace);
     }
@@ -278,7 +276,7 @@ export class ObjectManager {
           data[i] = this.serializeItem(data[i], origVal[i]);
         }
       } else {
-        for (const [key, val] of objEntries(data)) {
+        for (const [key, val] of Object.entries(data)) {
           data[key] = this.serializeItem(val, origVal[key]);
         }
       }
@@ -300,7 +298,7 @@ export class ObjectManager {
         }
       }
     } else {
-      for (const [key, val] of objEntries(obj)) {
+      for (const [key, val] of Object.entries(obj)) {
         if (val != null && typeof val === 'object') {
           queue.push(func.bind(this, obj, key, queue));
         }

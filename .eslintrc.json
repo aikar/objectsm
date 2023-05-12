@@ -33,10 +33,10 @@
             "templateStrings": true,
             "unicodePointEscapes": true,
             "globalReturn": false,
-            "jsx": true
+            "jsx": false
         }
     },
-    "parser": "babel-eslint",
+    "parser": "@babel/eslint-parser",
     "plugins": [
         "babel",
         "flowtype",

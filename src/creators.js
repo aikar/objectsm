@@ -10,14 +10,13 @@
  */
 
 import type {DataParameter} from "./index";
-import objEntries from "object.entries";
 
 export class ObjectCreator {
 
   createObject(objCls: Function, data: DataParameter): Promise<any> | any {
     const obj = Object.create(objCls.prototype);
 
-    for (const [key, val] of objEntries(data)) {
+    for (const [key, val] of Object.entries(data)) {
       obj[key] = val;
     }
     return obj;
@@ -46,7 +45,7 @@ export const DefaultObjectCreator = new ObjectCreator();
  */
 export const MapObjectCreator = new (class MapObjectCreator extends ObjectCreator {
   createObject(objCls: Function, data: DataParameter): any {
-    return new Map(objEntries(data));
+    return new Map(Object.entries(data));
   }
 })();
 
