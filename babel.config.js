@@ -4,8 +4,6 @@ module.exports = {
     ["@babel/preset-env", {
       loose: true,
       modules: "commonjs",
-      useBuiltIns: "usage",
-      corejs: 3,
       include: [],
       targets: {
         node: 8,

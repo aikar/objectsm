@@ -1,6 +1,6 @@
 {
   "name": "objectsm",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "JS Object Serializer/Deserializer Manager to convert JS objects with saved metadata back into instances of the class they were created with. This library intends to behave like PHP serialize/deserialize does.",
   "exports": "./dist/index.js",
   "scripts": {
@@ -15,6 +15,9 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/aikar/objectsm.git"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
   },
   "files": [
     "dist",
@@ -48,7 +51,6 @@
     "@babel/register": "^7.21.0",
     "babel-plugin-transform-flow-strip-types": "^6.22.0",
     "chalk": "^2.1.0",
-    "core-js": "^3",
     "cross-env": "^5.1.0",
     "eslint": "^8.40.0",
     "eslint-plugin-babel": "^5.1.0",
@@ -76,8 +78,5 @@
     "as-array": "^2.0.0",
     "clone": "^2.1.2",
     "object-tojson": "^3.0.0"
-  },
-  "peerDependencies": {
-    "core-js": "^3"
   }
 }
