@@ -172,7 +172,7 @@ export class ObjectManager {
   }
 
   async serialize(data: DataParameter | DataParameterArray): Promise<any> {
-    const json = toJson(data);
+    const json = toJson(data, null, true);
     this.serializeItem(json, data);
     return json;
   }

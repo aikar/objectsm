@@ -1,6 +1,6 @@
 {
   "name": "objectsm",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "JS Object Serializer/Deserializer Manager to convert JS objects with saved metadata back into instances of the class they were created with. This library intends to behave like PHP serialize/deserialize does.",
   "exports": "./dist/index.js",
   "scripts": {
